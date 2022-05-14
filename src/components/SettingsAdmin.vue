@@ -1,0 +1,39 @@
+<template>
+    <van-cell-group>
+        <van-field v-model="config.id" readonly label="用户ID" type="number"></van-field>
+        <van-field v-model="config.nickname" readonly label="用户名"></van-field>
+        <van-field v-model="config.schoolId" readonly label="学校ID"></van-field>
+        <van-field readonly label="超时时间"></van-field>
+        <van-slider v-model="config.timeout" :min="10" :max="600">
+        </van-slider>
+    </van-cell-group>
+</template>
+
+<script>
+const api = "http://127.0.0.1:8080";
+import { Cell, CellGroup, Field, Slider } from 'vant';
+export default {
+    components: {
+        [Cell.name]: Cell,
+        [CellGroup.name]: CellGroup,
+        [Field.name]: Field,
+        [Slider.name]: Slider
+    },
+
+    data() {
+        return {
+            config: {}
+        }
+    },
+    mounted() {
+        fetch(api + "/config/1", {
+            method: "get"
+        }).then(resp => resp.json()).then(respJson => {
+            this.config = respJson.data.config
+        })
+    }
+}
+</script>
+
+<style>
+</style>

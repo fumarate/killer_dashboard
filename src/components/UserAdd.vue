@@ -1,0 +1,84 @@
+<template>
+    <van-cell-group>
+        <van-field v-model="newUserId" placeholder="手机号码" />
+        <van-field v-model="newUserCaptcha" placeholder="验证码">
+            <template #button>
+                <van-button type="primary" @click="requestCaptcha">发送验证码</van-button>
+            </template>
+        </van-field>
+        <van-button type="primary" v-model="newUserCaptcha" @click="addUser" :style="{ width: '100%' }">添加用户
+        </van-button>
+    </van-cell-group>
+</template>
+
+<script>
+
+const api = "http://127.0.0.1:8080"
+import { Button, Cell, CellGroup, Dialog, Field, SwipeCell } from 'vant'
+export default {
+    components: {
+        [Button.name]: Button,
+        [Cell.name]: Cell,
+        [CellGroup.name]: CellGroup,
+        [Dialog.name]: Dialog,
+        [Field.name]: Field,
+        [SwipeCell.name]: SwipeCell
+    },
+    data() {
+        return {
+            newUserId: "",
+            newUserCaptcha: "",
+        };
+    },
+    mounted() {
+    },
+    methods: {
+        addUser: function () {
+            if (
+                this.newUserId.length === 11 &&
+                this.newUserCaptcha.length === 4
+            ) {
+                fetch(api + "/user/" + this.newUserId, {
+                    method: "post",
+                    body: JSON.stringify({
+                        captcha: this.newUserCaptcha,
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+                    .then((resp) => resp.json())
+                    .then((respJson) => {
+                        if (respJson.status) {
+                            Dialog.alert({ message: "添加成功!" });
+                            this.$route.back();
+                        } else {
+                            Dialog.alert({ message: respJson.exception });
+                        }
+                    });
+            }
+        },
+        requestCaptcha: function () {
+            if (this.newUserId.length === 11) {
+                fetch(api + "/captcha/" + this.newUserId, {
+                    method: "get",
+                })
+                    .then((resp) => resp.json())
+                    .then((respJson) => {
+                        if (respJson.status) {
+                            document
+                                .getElementById("newUserIdInput")
+                                .setAttribute("disabled", true);
+                            Dialog.alert({ message: "请求成功!" });
+                        } else {
+                            Dialog.alert({ message: respJson.exception });
+                        }
+                    });
+            }
+        },
+    }
+}
+</script>
+
+<style>
+</style>
