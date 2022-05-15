@@ -1,9 +1,9 @@
 <template>
-    <van-cell-group>
+    <van-cell-group inset>
         <van-field v-model="newUserId" placeholder="手机号码" />
         <van-field v-model="newUserCaptcha" placeholder="验证码">
             <template #button>
-                <van-button type="primary" @click="requestCaptcha">发送验证码</van-button>
+                <van-button type="primary" @click="requestCaptcha" size="small">发送验证码</van-button>
             </template>
         </van-field>
         <van-button type="primary" v-model="newUserCaptcha" @click="addUser" :style="{ width: '100%' }">添加用户
@@ -12,8 +12,7 @@
 </template>
 
 <script>
-
-const api = "http://127.0.0.1:8080"
+import { default as api } from '../api/api'
 import { Button, Cell, CellGroup, Dialog, Field, SwipeCell } from 'vant'
 export default {
     components: {

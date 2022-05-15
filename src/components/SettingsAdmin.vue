@@ -4,13 +4,11 @@
         <van-field v-model="config.nickname" readonly label="用户名"></van-field>
         <van-field v-model="config.schoolId" readonly label="学校ID"></van-field>
         <van-field readonly label="超时时间"></van-field>
-        <van-slider v-model="config.timeout" :min="10" :max="600">
-        </van-slider>
     </van-cell-group>
 </template>
 
 <script>
-const api = "http://127.0.0.1:8080";
+import { default as api } from '../api/api'
 import { Cell, CellGroup, Field, Slider } from 'vant';
 export default {
     components: {

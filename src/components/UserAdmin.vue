@@ -1,7 +1,6 @@
 <template>
-    <van-cell-group>
+    <van-cell-group inset>
         <van-button type="primary" @click="addUser" :style="{ width: '100%' }">添加用户</van-button>
-
         <van-swipe-cell v-for="user in users" :key="user.userId">
             <van-cell>
                 {{ user.userId }}
@@ -13,7 +12,7 @@
     </van-cell-group>
 </template>
 <script>
-const api = "http://127.0.0.1:8080"
+import { default as api } from '../api/api'
 import { Button, Cell, CellGroup, Dialog, Field, SwipeCell } from 'vant'
 export default {
     components: {

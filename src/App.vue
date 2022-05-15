@@ -1,11 +1,13 @@
 <template>
-  <van-nav-bar v-if="isBase" :title="titles[active].title" />
-  <van-nav-bar v-else :title="titles[active].title" left-text="返回" left-arrow @click-left="onReturn" />
+  <van-nav-bar v-if="isBase" :title="navBarTitle" />
+  <van-nav-bar v-else :title="navBarTitle" left-text="返回" left-arrow @click-left="onReturn" />
   <router-view :style="{ height: '100%' }" />
-  <van-tabbar v-model="active">
-    <van-tabbar-item v-for="title in titles" :icon="title.icon" :key="title.title" :to="title.to">{{ title.title }}
+  <van-tabbar placeholder route v-model="active">
+    <van-tabbar-item v-for="title in titles" replace :icon="title.icon" :key="title.title" :to="title.to">{{ title.title
+    }}
     </van-tabbar-item>
   </van-tabbar>
+
 </template>
 
 <script>
@@ -17,9 +19,12 @@ export default {
     [Tabbar.name]: Tabbar,
     [TabbarItem.name]: TabbarItem
   },
+  mounted() {
+
+  },
   data() {
     return {
-      active: 1,
+      active: 0,
       titles: [
         {
           title: '主页',
@@ -59,6 +64,14 @@ export default {
         }
       }
       return backslash <= 1
+    },
+    navBarTitle() {
+      for (let i = this.titles.length-1; i >=0; i--) {
+        if (this.$route.path.startsWith(this.titles[i].to)) {
+          return this.titles[i].title;
+        }
+      }
+      return 0;
     }
   }
 }
@@ -67,7 +80,10 @@ export default {
 <style>
 html,
 body {
-  overflow: hidden;
+
+  background-color: #eaeaea;
+
+
 }
 
 #app {
@@ -76,6 +92,5 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-
 }
 </style>
