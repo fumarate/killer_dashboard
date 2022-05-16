@@ -1,9 +1,9 @@
 <template>
-  <van-nav-bar v-if="isBase" :title="navBarTitle" />
-  <van-nav-bar v-else :title="navBarTitle" left-text="返回" left-arrow @click-left="onReturn" />
+  <!--van-nav-bar v-if="isBase" :title="navBarTitle" /-->
+  <!--van-nav-bar v-else :title="navBarTitle" left-text="返回" left-arrow @click-left="onReturn" /-->
   <router-view :style="{ height: '100%' }" />
   <van-tabbar placeholder route v-model="active">
-    <van-tabbar-item v-for="title in titles" replace :icon="title.icon" :key="title.title" :to="title.to">{{ title.title
+    <van-tabbar-item v-for="title in titles" replace :icon="title.icon" :key="title.title" :to="title.to" :badge="(title.badge&&(count>0))?count:null">{{ title.title
     }}
     </van-tabbar-item>
   </van-tabbar>
@@ -11,7 +11,9 @@
 </template>
 
 <script>
+import '@/assets/css/global.scss'
 import { NavBar, Tabbar, TabbarItem } from 'vant';
+import api from '@/api/api'
 export default {
   name: 'App',
   components: {
@@ -20,16 +22,29 @@ export default {
     [TabbarItem.name]: TabbarItem
   },
   mounted() {
+fetch(api + "/history")
+            .then(resp => resp.json())
+            .then(respJson => {
+              let count=0;
+                for(var i=0;i<respJson.data.history.length;i++){
+                    if(!respJson.data.history[i].checked){
+                        count+=1;
+                    }
+                }
+                this.count=count;
+            })
 
   },
   data() {
     return {
       active: 0,
+      count:0,
       titles: [
         {
           title: '主页',
           to: '/',
-          icon: 'home-o'
+          icon: 'home-o',
+          badge:true
         },
         {
           title: '任务',
@@ -78,13 +93,6 @@ export default {
 </script>
 
 <style>
-html,
-body {
-
-  background-color: #eaeaea;
-
-
-}
 
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

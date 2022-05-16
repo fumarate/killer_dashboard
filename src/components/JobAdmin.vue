@@ -1,9 +1,8 @@
 <template>
     <van-pull-refresh v-model="jobLoading" @refresh="onRefresh">
         <van-cell-group inset>
-            <van-button type="primary" @click="addJob" :style="{ width: '100%' }">添加任务</van-button>
             <van-swipe-cell v-for="(job, index) in jobs" :key="index">
-                <van-button @click="viewJob(index)" :style="{ width: '100%' }">{{ job.source }}{{ job.needList }}
+                <van-button @click="viewJob(job.hash)" :style="{ width: '100%' }">{{ job.source }}{{ job.needList }}
                 </van-button>
                 <template #right>
                     <van-button v-if="job.enable" @click="enableJob(job.hash, 0)">关闭</van-button>
@@ -13,6 +12,9 @@
                 </template>
             </van-swipe-cell>
         </van-cell-group>
+        <div style="margin:16px">
+            <van-button type="primary" @click="addJob" :style="{ width: '100%' }" round>添加任务</van-button>
+        </div>
     </van-pull-refresh>
 </template>
 
@@ -88,7 +90,7 @@ export default {
                 });
         },
         enableJob(hash, enable) {
-            Dialog.confirm({ message: enable ? "启动" : "停止" + "任务" + hash + "?" })
+            Dialog.confirm({ message: (enable ? "启动" : "停止") + "任务" + hash + "?" })
                 .then(() => {
                     for (let i = 0; i < this.jobs.length; i++) {
                         if (this.jobs[i].hash == hash) {
@@ -108,18 +110,20 @@ export default {
                 })
                     .then((resp) => resp.json())
                     .then((respJson) => {
-                        if (respJson.code == 0) {
-                            this.onRefresh();
+                        if (respJson.status) {
+                            Dialog.alert({ message: "任务更新成功!" })
+                                .then(() => {
+                                    this.onRefresh();
+                                });
                         }
                     });
             }
         },
-        viewJob(jobIndex) {
+        viewJob(hash) {
             this.$router.push({
                 path: "/job/add",
                 query: {
-                    job: JSON.stringify(this.jobs[jobIndex]),
-                    update:true
+                    hash: hash
                 },
             });
             /*
@@ -139,7 +143,7 @@ export default {
         runJob: function (jobHash) {
             Dialog.confirm({ message: "运行任务" + jobHash + "?" })
                 .then(() => {
-                    fetch(api + "/job/" + jobHash + "/run", {
+                    fetch(api + "/job/" + jobHash + "/trig", {
                         method: "post",
                     })
                         .then((resp) => resp.json())

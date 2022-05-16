@@ -3,7 +3,6 @@
         <van-field v-model="config.id" readonly label="用户ID" type="number"></van-field>
         <van-field v-model="config.nickname" readonly label="用户名"></van-field>
         <van-field v-model="config.schoolId" readonly label="学校ID"></van-field>
-        <van-field readonly label="超时时间"></van-field>
     </van-cell-group>
 </template>
 

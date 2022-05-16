@@ -1,24 +1,19 @@
 # killer-dashboard
 
-## Project setup
-```
-npm install
-```
+## Information 
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+The frontend of a killer-system.
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Problems to Solve
 
-### Lints and fixes files
-```
-npm run lint
-```
+- New job runned, but the dot which hints the histories is not updated.
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+> Use a websocket or `setTimeout`.
+
+- In some browser, it is unable to directly visited the pages out of '/'. [#1](https://github.com/fumarate/killer_dashboard/issues/1)
+
+> Need more learning.
+
+- Very ugly.
+
+> Need more learning.

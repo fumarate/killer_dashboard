@@ -1,19 +1,23 @@
 <template>
-    <van-cell-group inset>
-        <van-button type="primary" @click="addUser" :style="{ width: '100%' }">添加用户</van-button>
-        <van-swipe-cell v-for="user in users" :key="user.userId">
-            <van-cell>
-                {{ user.userId }}
-            </van-cell>
-            <template #right>
-                <van-button type="danger" @click="deleteUser(user.userId)">删除</van-button>
-            </template>
-        </van-swipe-cell>
-    </van-cell-group>
+    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+        <van-cell-group inset>
+            <van-swipe-cell v-for="user in users" :key="user.userId">
+                <van-cell>
+                    {{ user.userId }}
+                </van-cell>
+                <template #right>
+                    <van-button type="danger" @click="deleteUser(user.userId)">删除</van-button>
+                </template>
+            </van-swipe-cell>
+        </van-cell-group>
+        <div style="margin:16px">
+            <van-button type="primary" round @click="addUser" :style="{ width: '100%' }">添加用户</van-button>
+        </div>
+    </van-pull-refresh>
 </template>
 <script>
 import { default as api } from '../api/api'
-import { Button, Cell, CellGroup, Dialog, Field, SwipeCell } from 'vant'
+import { Button, Cell, CellGroup, Dialog, Field, SwipeCell, PullRefresh } from 'vant'
 export default {
     components: {
         [Button.name]: Button,
@@ -21,23 +25,34 @@ export default {
         [CellGroup.name]: CellGroup,
         [Dialog.name]: Dialog,
         [Field.name]: Field,
-        [SwipeCell.name]: SwipeCell
+        [SwipeCell.name]: SwipeCell,
+        [PullRefresh.name]: PullRefresh
     },
     data() {
         return {
             users: null,
             newUserId: "",
             newUserCaptcha: "",
+            refreshing: false
         };
     },
     mounted() {
-        fetch(api + "/user", {
-            method: "GET",
-        })
-            .then((resp) => resp.json())
-            .then((respJson) => (this.users = respJson.data.users));
+        this.getUser()
     },
     methods: {
+        onRefresh() {
+            this.getUser();
+            setTimeout(() => {
+                this.refreshing = false;
+            }, 1000);
+        },
+        getUser() {
+            fetch(api + "/user", {
+                method: "GET",
+            })
+                .then((resp) => resp.json())
+                .then((respJson) => (this.users = respJson.data.users))
+        },
         addUser: function () {
             this.$router.push("/user/add");
         },

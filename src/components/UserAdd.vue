@@ -1,19 +1,24 @@
 <template>
-    <van-cell-group inset>
-        <van-field v-model="newUserId" placeholder="手机号码" />
-        <van-field v-model="newUserCaptcha" placeholder="验证码">
-            <template #button>
-                <van-button type="primary" @click="requestCaptcha" size="small">发送验证码</van-button>
-            </template>
-        </van-field>
-        <van-button type="primary" v-model="newUserCaptcha" @click="addUser" :style="{ width: '100%' }">添加用户
-        </van-button>
-    </van-cell-group>
+    <van-form>
+        <van-cell-group inset>
+            <van-field v-model="newUserId" label="手机号码" :rules="[{required:true,message:'请填写手机号'}]"/>
+            <van-field v-model="newUserCaptcha" label="验证码" :rules="[{required:true,message:'请填写验证码'}]">
+                <template #button>
+                    <van-button type="primary" @click="requestCaptcha" size="small">发送验证码</van-button>
+                </template>
+            </van-field>
+
+        </van-cell-group>
+        <div style="margin:16px">
+            <van-button type="primary" round v-model="newUserCaptcha" @click="addUser" :style="{ width: '100%' }">添加用户
+            </van-button>
+        </div>
+    </van-form>
 </template>
 
 <script>
 import { default as api } from '../api/api'
-import { Button, Cell, CellGroup, Dialog, Field, SwipeCell } from 'vant'
+import { Button, Cell, CellGroup, Dialog, Field, Form, SwipeCell } from 'vant'
 export default {
     components: {
         [Button.name]: Button,
@@ -21,7 +26,8 @@ export default {
         [CellGroup.name]: CellGroup,
         [Dialog.name]: Dialog,
         [Field.name]: Field,
-        [SwipeCell.name]: SwipeCell
+        [SwipeCell.name]: SwipeCell,
+        [Form.name]: Form
     },
     data() {
         return {
