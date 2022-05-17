@@ -2,13 +2,13 @@
     <van-pull-refresh v-model="jobLoading" @refresh="onRefresh">
         <van-cell-group inset>
             <van-swipe-cell v-for="(job, index) in jobs" :key="index">
-                <van-button @click="viewJob(job.hash)" :style="{ width: '100%' }">{{ job.source }}{{ job.needList }}
+                <van-button @click="viewJob(job.id)" :style="{ width: '100%' }">{{ job.source }}{{ job.needList }}
                 </van-button>
                 <template #right>
-                    <van-button v-if="job.enable" @click="enableJob(job.hash, 0)">关闭</van-button>
-                    <van-button v-else @click="enableJob(job.hash, 1)">开启</van-button>
-                    <van-button @click="runJob(job.hash)">运行</van-button>
-                    <van-button type="danger" @click="deleteJob(job.hash)">删除</van-button>
+                    <van-button v-if="job.enable" @click="enableJob(job.id, 0)">关闭</van-button>
+                    <van-button v-else @click="enableJob(job.id, 1)">开启</van-button>
+                    <van-button @click="runJob(job.id)">运行</van-button>
+                    <van-button type="danger" @click="deleteJob(job.id)">删除</van-button>
                 </template>
             </van-swipe-cell>
         </van-cell-group>
@@ -84,16 +84,16 @@ export default {
                 method: "GET",
             })
                 .then((resp) => resp.json())
-                .then((respJson) => (this.jobs = respJson.data.jobs))
+                .then((respJson) => (this.jobs = respJson.data))
                 .finally(() => {
                     this.jobLoading = false;
                 });
         },
-        enableJob(hash, enable) {
-            Dialog.confirm({ message: (enable ? "启动" : "停止") + "任务" + hash + "?" })
+        enableJob(id, enable) {
+            Dialog.confirm({ message: (enable ? "启动" : "停止") + "任务" + "?" })
                 .then(() => {
                     for (let i = 0; i < this.jobs.length; i++) {
-                        if (this.jobs[i].hash == hash) {
+                        if (this.jobs[i].id == id) {
                             this.jobs[i].enable = enable;
                             this.putJob(this.jobs[i]);
                         }
@@ -102,7 +102,7 @@ export default {
         },
         putJob(job) {
             if (job != null) {
-                fetch(api + "/job/" + job.hash, {
+                fetch(api + "/job/" + job.id, {
                     method: "PUT",
                     body: JSON.stringify(job), headers: {
                         "Content-Type": "application/json",
@@ -119,11 +119,11 @@ export default {
                     });
             }
         },
-        viewJob(hash) {
+        viewJob(id) {
             this.$router.push({
                 path: "/job/add",
                 query: {
-                    hash: hash
+                    id: id
                 },
             });
             /*
@@ -140,10 +140,10 @@ export default {
                    "message": info
                })*/
         },
-        runJob: function (jobHash) {
-            Dialog.confirm({ message: "运行任务" + jobHash + "?" })
+        runJob: function (id) {
+            Dialog.confirm({ message: "运行任务" + id + "?" })
                 .then(() => {
-                    fetch(api + "/job/" + jobHash + "/trig", {
+                    fetch(api + "/job/" + id + "/trig", {
                         method: "post",
                     })
                         .then((resp) => resp.json())
@@ -157,10 +157,10 @@ export default {
                 })
 
         },
-        deleteJob: function (jobHash) {
-            Dialog.confirm({ message: "删除任务" + jobHash + "?" })
+        deleteJob: function (id) {
+            Dialog.confirm({ message: "删除任务" + id + "?" })
                 .then(() => {
-                    fetch(api + "/job/" + jobHash, {
+                    fetch(api + "/job/" + id, {
                         method: "delete",
                     })
                         .then((resp) => resp.json())

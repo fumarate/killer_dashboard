@@ -94,6 +94,11 @@
                     </template>
                 </van-field>
             </van-cell>
+            <van-cell>
+                <van-field label="备注" v-model="job.info">
+
+                </van-field>
+            </van-cell>
         </van-cell-group>
         <div style="margin:16px">
             <van-button type="primary" native-type="submit" round v-if="update" :style="{ width: '100%' }">更新
@@ -147,7 +152,8 @@ export default {
                 blackList: [],
                 needList: {},
                 enable: true,
-                timeout: 300
+                timeout: 300,
+                info:""
             },
             update: false,
             hotNeedListWords: [
@@ -161,7 +167,7 @@ export default {
         fetch(api + "/school/229", { method: "GET" })
             .then((resp) => resp.json())
             .then((respJson) => {
-                this.shops = respJson.data.shops.map((shop) => {
+                this.shops = respJson.data.map((shop) => {
                     return {
                         value: shop.shop_id,
                         text: shop.shop_name,
@@ -173,16 +179,16 @@ export default {
         })
             .then((resp) => resp.json())
             .then((respJson) => {
-                this.users = respJson.data.users;
+                this.users = respJson.data;
             });
-        if (this.$route.query.hash) {
+        if (this.$route.query.id) {
             this.update = true;
-            fetch(api + "/job/" + this.$route.query.hash, {
+            fetch(api + "/job/" + this.$route.query.id, {
                 method: "GET",
             })
                 .then((resp) => resp.json())
                 .then((respJson) => {
-                    this.job = respJson.data.job;
+                    this.job = respJson.data;
                     this.timeoutPow = Math.log10(this.job.timeout);
                 })
             console.log(this.job)
@@ -306,7 +312,7 @@ export default {
         updateJob() {
             Dialog.confirm({ message: "更新任务?" })
                 .then(() => {
-                    fetch(api + "/job/" + this.job.hash, {
+                    fetch(api + "/job/" + this.job.id, {
                         method: "PUT",
                         body: JSON.stringify(this.job),
                         headers: {

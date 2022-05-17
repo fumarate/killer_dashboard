@@ -51,11 +51,11 @@ const route = createRouter({
 });
 
 
-route.beforeEach((to,from,next)=>{//beforeEach是router的钩子函数，在进入路由前执行
-  if(to.meta.title){//判断是否有标题
+route.beforeEach((to,from,next)=>{
+  if(to.meta.title){
       document.title = to.meta.title
   }
-  next()  //执行进入路由，如果不写就不会进入目标页
+  next()
 })
 
 export default route;

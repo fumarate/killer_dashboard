@@ -7,8 +7,12 @@
             </van-cell>
             <van-cell center icon="orders-o" is-link title="Job" :value="job + ' in Total'" @click="gotoJob">
             </van-cell>
-            <van-cell v-for="history in histories" :key="history.id" @click="checkHistory(history.id)">
-                {{ history.jobHash }}
+            <van-cell  v-for="history in histories" :title="history.title" :key="history.id" @click="checkHistory(history.id)">
+            <template #icon>
+                <van-tag v-if="!history.checked" type="danger" round>NEW</van-tag>
+            </template>
+
+            {{history.datetime}}
             </van-cell>
         </van-cell-group>
     </van-pull-refresh>
@@ -16,7 +20,7 @@
 
 <script>
 import api from '../api/api'
-import { Icon, Cell, CellGroup, Row, Col, Dialog, Field, PullRefresh } from 'vant';
+import { Icon, Cell, CellGroup, Row, Col, Dialog, Field, PullRefresh,Tag } from 'vant';
 export default {
     components: {
         [Icon.name]: Icon,
@@ -26,15 +30,16 @@ export default {
         [Col.name]: Col,
         [Dialog.name]: Dialog,
         [Field.name]: Field,
-        [PullRefresh.name]: PullRefresh
+        [PullRefresh.name]: PullRefresh,
+        [Tag.name]:Tag
     },
     mounted() {
         this.init()
     },
     data() {
         return {
-            user: 0,
-            job: 0,
+            userNum: 0,
+            jobNum: 0,
             histories: [],
             refreshing: false
         }
@@ -54,14 +59,27 @@ export default {
             fetch(api + "/info")
                 .then(resp => resp.json())
                 .then(respJson => {
-                    this.user = respJson.data.info.user_num
-                    this.job = respJson.data.info.job_num
+                    this.user = respJson.data.userNum
+                    this.job = respJson.data.jobNum
                 })
             fetch(api + "/history")
                 .then(resp => resp.json())
                 .then(respJson => {
-                    this.histories = respJson.data.history
+                    this.histories = respJson.data
+                }).then(() => {
+                    fetch(api + "/job")
+                        .then(resp => resp.json())
+                        .then((respJson) => {
+                            for (let i = 0; i < respJson.data.length; i++) {
+                                for (let j = 0; j < this.histories.length; j++) {
+                                    if (this.histories[j].jobId == respJson.data[i].id) {
+                                        this.histories[j]["title"] = respJson.data[i].info
+                                    }
+                                }
+                            }
+                        })
                 })
+
         },
         gotoUser() {
             this.$router.push('/user');
@@ -91,5 +109,4 @@ export default {
 </script>
 
 <style scoped>
-van-cell {}
 </style>

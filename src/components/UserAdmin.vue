@@ -51,7 +51,7 @@ export default {
                 method: "GET",
             })
                 .then((resp) => resp.json())
-                .then((respJson) => (this.users = respJson.data.users))
+                .then((respJson) => (this.users = respJson.data))
         },
         addUser: function () {
             this.$router.push("/user/add");

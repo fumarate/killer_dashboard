@@ -1,5 +1,5 @@
 <template>
-  <!--van-nav-bar v-if="isBase" :title="navBarTitle" /-->
+  <van-nav-bar :title="Killer" />
   <!--van-nav-bar v-else :title="navBarTitle" left-text="返回" left-arrow @click-left="onReturn" /-->
   <router-view :style="{ height: '100%' }" />
   <van-tabbar placeholder route v-model="active">
@@ -26,8 +26,8 @@ fetch(api + "/history")
             .then(resp => resp.json())
             .then(respJson => {
               let count=0;
-                for(var i=0;i<respJson.data.history.length;i++){
-                    if(!respJson.data.history[i].checked){
+                for(var i=0;i<respJson.data.length;i++){
+                    if(!respJson.data[i].checked){
                         count+=1;
                     }
                 }

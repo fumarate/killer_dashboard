@@ -1,8 +1,8 @@
 <template>
     <van-form>
         <van-cell-group inset>
-            <van-field v-model="newUserId" label="手机号码" :rules="[{required:true,message:'请填写手机号'}]"/>
-            <van-field v-model="newUserCaptcha" label="验证码" :rules="[{required:true,message:'请填写验证码'}]">
+            <van-field v-model="newUserId" label="手机号码" :rules="[{ required: true, message: '请填写手机号' }]" />
+            <van-field v-model="newUserCaptcha" label="验证码" :rules="[{ required: true, message: '请填写验证码' }]">
                 <template #button>
                     <van-button type="primary" @click="requestCaptcha" size="small">发送验证码</van-button>
                 </template>
@@ -55,8 +55,10 @@ export default {
                     .then((resp) => resp.json())
                     .then((respJson) => {
                         if (respJson.status) {
-                            Dialog.alert({ message: "添加成功!" });
-                            this.$route.back();
+                            Dialog.alert({ message: "添加成功!" })
+                                .then(() => {
+                                    this.$router.back();
+                                });
                         } else {
                             Dialog.alert({ message: respJson.exception });
                         }
@@ -71,9 +73,6 @@ export default {
                     .then((resp) => resp.json())
                     .then((respJson) => {
                         if (respJson.status) {
-                            document
-                                .getElementById("newUserIdInput")
-                                .setAttribute("disabled", true);
                             Dialog.alert({ message: "请求成功!" });
                         } else {
                             Dialog.alert({ message: respJson.exception });
