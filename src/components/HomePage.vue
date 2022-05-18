@@ -7,12 +7,14 @@
             </van-cell>
             <van-cell center icon="orders-o" is-link title="Job" :value="job + ' in Total'" @click="gotoJob">
             </van-cell>
-            <van-cell  v-for="history in histories" :title="history.title" :key="history.id" @click="checkHistory(history.id)">
-            <template #icon>
-                <van-tag v-if="!history.checked" type="danger" round>NEW</van-tag>
-            </template>
-
-            {{history.datetime}}
+            <van-cell v-for="history in histories" :title="history.title" :key="history.id"
+                @click="checkHistory(history.id)">
+                <template #icon>
+                    <van-tag v-if="history.status=='SUCCESS'" type="success">{{history.status}}</van-tag>
+                    <van-tag v-if="history.status=='RUNNING'" type="warning">{{history.status}}</van-tag>
+                    <van-tag v-if="history.status=='FAILED'" type="danger">{{history.status}}</van-tag>
+                </template>
+                {{ history.time }}
             </van-cell>
         </van-cell-group>
     </van-pull-refresh>
@@ -20,7 +22,7 @@
 
 <script>
 import api from '../api/api'
-import { Icon, Cell, CellGroup, Row, Col, Dialog, Field, PullRefresh,Tag } from 'vant';
+import { Icon, Cell, CellGroup, Row, Col, Dialog, Field, PullRefresh, Tag ,Checkbox} from 'vant';
 export default {
     components: {
         [Icon.name]: Icon,
@@ -31,7 +33,8 @@ export default {
         [Dialog.name]: Dialog,
         [Field.name]: Field,
         [PullRefresh.name]: PullRefresh,
-        [Tag.name]:Tag
+        [Tag.name]: Tag,
+        [Checkbox.name]:Checkbox
     },
     mounted() {
         this.init()

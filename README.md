@@ -17,3 +17,7 @@ The frontend of a killer-system.
 - Very ugly.
 
 > Need more learning.
+
+## Something to Log
+
+Add `try_files $uri $uri/ /index.html;` to nginx configuration.

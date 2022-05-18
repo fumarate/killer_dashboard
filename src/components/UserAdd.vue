@@ -60,7 +60,7 @@ export default {
                                     this.$router.back();
                                 });
                         } else {
-                            Dialog.alert({ message: respJson.exception });
+                            Dialog.alert({ message: respJson.message });
                         }
                     });
             }
@@ -75,7 +75,7 @@ export default {
                         if (respJson.status) {
                             Dialog.alert({ message: "请求成功!" });
                         } else {
-                            Dialog.alert({ message: respJson.exception });
+                            Dialog.alert({ message: respJson.message });
                         }
                     });
             }

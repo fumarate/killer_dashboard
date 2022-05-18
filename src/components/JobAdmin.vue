@@ -2,7 +2,7 @@
     <van-pull-refresh v-model="jobLoading" @refresh="onRefresh">
         <van-cell-group inset>
             <van-swipe-cell v-for="(job, index) in jobs" :key="index">
-                <van-button @click="viewJob(job.id)" :style="{ width: '100%' }">{{ job.source }}{{ job.needList }}
+                <van-button @click="viewJob(job.id)" :style="{ width: '100%' }">{{ job.source }}:{{job.info}}
                 </van-button>
                 <template #right>
                     <van-button v-if="job.enable" @click="enableJob(job.id, 0)">关闭</van-button>
