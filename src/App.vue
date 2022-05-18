@@ -1,5 +1,6 @@
 <template>
   <van-nav-bar :title="Killer" />
+
   <!--van-nav-bar v-else :title="navBarTitle" left-text="返回" left-arrow @click-left="onReturn" /-->
   <router-view :style="{ height: '100%' }" />
   <van-tabbar placeholder route v-model="active">

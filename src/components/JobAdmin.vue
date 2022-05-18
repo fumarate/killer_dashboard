@@ -1,25 +1,41 @@
 <template>
-    <van-pull-refresh v-model="jobLoading" @refresh="onRefresh">
-        <van-cell-group inset>
-            <van-swipe-cell v-for="(job, index) in jobs" :key="index">
-                <van-button @click="viewJob(job.id)" :style="{ width: '100%' }">{{ job.source }}:{{job.info}}
-                </van-button>
-                <template #right>
-                    <van-button v-if="job.enable" @click="enableJob(job.id, 0)">关闭</van-button>
-                    <van-button v-else @click="enableJob(job.id, 1)">开启</van-button>
-                    <van-button @click="runJob(job.id)">运行</van-button>
-                    <van-button type="danger" @click="deleteJob(job.id)">删除</van-button>
-                </template>
-            </van-swipe-cell>
-        </van-cell-group>
-        <div style="margin:16px">
-            <van-button type="primary" @click="addJob" :style="{ width: '100%' }" round>添加任务</van-button>
-        </div>
+
+
+    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+        <van-dropdown-menu>
+            <van-dropdown-item v-model="selectedSource" :options="sourceOption" />
+        </van-dropdown-menu>
+        <div style="height:1rem"></div>
+        <van-loading v-if="loading" type="spinner" />
+        <van-skeleton :loading="loading" title :row="3">
+            <van-cell-group inset>
+                <div v-for="(job, index) in jobs" :key="index">
+                    <div v-if="selectedSource == null ? true : job.source == selectedSource">
+                        <van-swipe-cell>
+                            <van-button :style="{ width: '100%' }" @click="viewJob(index)">{{ job.source }}:{{ job.info
+                            }}
+                            </van-button>
+                            <template #left>
+                                <van-button type="primary" @click="editJob(job.id)">编辑</van-button>
+                            </template>
+                            <template #right>
+                                <van-button v-if="job.enable" @click="enableJob(job.id, 0)">关闭</van-button>
+                                <van-button v-else @click="enableJob(job.id, 1)">开启</van-button>
+                                <van-button @click="runJob(job.id)">运行</van-button>
+                                <van-button type="danger" @click="deleteJob(job.id)">删除</van-button>
+                            </template>
+                        </van-swipe-cell>
+                    </div>
+                </div>
+            </van-cell-group>
+            <div style="margin:16px">
+                <van-button type="primary" @click="addJob" :style="{ width: '100%' }" round>添加任务</van-button>
+            </div>
+        </van-skeleton>
     </van-pull-refresh>
 </template>
 
 <script>
-//import * as moment from 'moment';
 import {
     Button,
     Cell,
@@ -33,7 +49,10 @@ import {
     Field,
     Popup,
     PullRefresh,
-    SwipeCell
+    SwipeCell,
+    Toast,
+    Loading,
+    Skeleton
 } from 'vant';
 import { default as api } from '../api/api'
 export default {
@@ -51,16 +70,28 @@ export default {
         [Popup.name]: Popup,
         [PullRefresh.name]: PullRefresh,
         [SwipeCell.name]: SwipeCell,
+        [Toast.name]: Toast,
+        [Loading.name]: Loading,
+        [Skeleton.name]: Skeleton
     },
     data() {
         return {
             adding: false,
             jobs: [],
-            jobLoading: false
+            refreshing: false,
+            selectedSource: null,
+            sourceOption: [
+            ],
+            loading: true
         };
     },
     mounted() {
         this.getJob();
+        setTimeout(
+            () => {
+                this.loading = false;
+            },
+            500)
     },
 
     methods: {
@@ -70,8 +101,10 @@ export default {
                 shopId;
         },
         onRefresh() {
+            this.getJob();
+            this.refreshing = true;
             setTimeout(() => {
-                this.getJob();
+                this.refreshing = false;
             }, 1000);
         },
         addJob() {
@@ -79,15 +112,28 @@ export default {
         }
         ,
         getJob() {
-            this.jobLoading = true;
             fetch(api + "/job", {
                 method: "GET",
             })
                 .then((resp) => resp.json())
                 .then((respJson) => (this.jobs = respJson.data))
-                .finally(() => {
-                    this.jobLoading = false;
-                });
+                .then(() => {
+                    let sources = {};
+                    for (const job in this.jobs) {
+                        sources[this.jobs[job].source] = 1;
+                    }
+                    this.sourceOption = Object.keys(sources).map((source) => {
+                        return {
+                            value: source,
+                            text: source
+                        }
+                    });
+                    this.sourceOption.unshift({
+                        value: null,
+                        text: '全部'
+                    });
+                })
+
         },
         enableJob(id, enable) {
             Dialog.confirm({ message: (enable ? "启动" : "停止") + "任务" + "?" })
@@ -111,34 +157,33 @@ export default {
                     .then((resp) => resp.json())
                     .then((respJson) => {
                         if (respJson.status) {
-                            Dialog.alert({ message: "任务更新成功!" })
-                                .then(() => {
-                                    this.onRefresh();
-                                });
+                            Toast("任务更新成功!")
+                            this.onRefresh();
                         }
                     });
             }
         },
-        viewJob(id) {
+        viewJob(index) {
+            const job = this.jobs[index];
+            let info = "账号：" + job.source + "\n" + "目标：" + job.target + "\n" + "添加时间：";
+            info += job.addTime;
+            info += "\n黑名单：" + job.blackList + "\n" + "需求商品：";
+            for (var key in job.needList) {
+                info += index;
+                info += + job.needList[key] + "份\n";
+            }
+            Dialog.alert({
+                "title": "任务详情",
+                "message": info
+            })
+        },
+        editJob(id) {
             this.$router.push({
                 path: "/job/add",
                 query: {
                     id: id
                 },
             });
-            /*
-               const job = this.jobs[jobIndex];
-               let info = "账号：" + job.source + "\n" + "目标：" + job.target + "\n" + "时间：";
-               info += moment(new Date()).hour(job.hour).minute(job.minute).format("HH:mm");
-               info += "\n黑名单：" + job.blackList + "\n" + "需求商品：";
-               for (var index in job.needList) {
-                   info += index;
-                   info += + job.needList[index] + "份\n";
-               }
-               Dialog.alert({
-                   "title": "任务详情",
-                   "message": info
-               })*/
         },
         runJob: function (id) {
             Dialog.confirm({ message: "运行任务" + id + "?" })
@@ -149,9 +194,9 @@ export default {
                         .then((resp) => resp.json())
                         .then((respJson) => {
                             if (respJson.status) {
-                                Dialog.alert({ message: "成功。" });
+                                Toast("已触发")
                             } else {
-                                Dialog.alert({ message: respJson.exception });
+                                Dialog.alert({ message: respJson.message });
                             }
                         });
                 })
@@ -166,17 +211,19 @@ export default {
                         .then((resp) => resp.json())
                         .then((respJson) => {
                             if (respJson.status) {
-                                Dialog.alert({ message: "成功。" })
-                                    .then(() => this.getJob());
-
+                                Toast("已删除")
+                                this.getJob();
                             } else {
-                                Dialog.alert({ message: respJson.exception });
+                                Dialog.alert({ message: respJson.message });
                             }
                         });
                 })
         },
 
     },
+    computed: {
+
+    }
 }
 </script>
 <style scoped>

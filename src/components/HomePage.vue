@@ -1,28 +1,52 @@
 <template>
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-
-
-        <van-cell-group inset>
-            <van-cell center icon="user-circle-o" is-link title="User" :value="user + ' in Total'" @click="gotoUser">
-            </van-cell>
-            <van-cell center icon="orders-o" is-link title="Job" :value="job + ' in Total'" @click="gotoJob">
-            </van-cell>
-            <van-cell v-for="history in histories" :title="history.title" :key="history.id"
-                @click="checkHistory(history.id)">
-                <template #icon>
-                    <van-tag v-if="history.status=='SUCCESS'" type="success">{{history.status}}</van-tag>
-                    <van-tag v-if="history.status=='RUNNING'" type="warning">{{history.status}}</van-tag>
-                    <van-tag v-if="history.status=='FAILED'" type="danger">{{history.status}}</van-tag>
-                </template>
-                {{ history.time }}
-            </van-cell>
-        </van-cell-group>
+        <div style="height:1rem"></div>
+        <van-loading v-if="loading" type="spinner" />
+        <van-skeleton :loading="loading" title :row="3">
+            <van-cell-group inset>
+                <van-cell center icon="user-circle-o" is-link title="User" :value="user + ' in Total'"
+                    @click="gotoUser">
+                </van-cell>
+                <van-cell center icon="orders-o" is-link title="Job" :value="job + ' in Total'" @click="gotoJob">
+                </van-cell>
+                <van-swipe-cell v-for="history in histories" :key="history.id">
+                    <van-cell :title="history.title" center>
+                        <template #icon>
+                            <van-tag v-if="history.status == 'SUCCESS'" type="success">{{ history.status }}</van-tag>
+                            <van-tag v-if="history.status == 'RUNNING'" type="warning">{{ history.status }}</van-tag>
+                            <van-tag v-if="history.status == 'FAILED'" type="danger">{{ history.status }}</van-tag>
+                        </template>
+                        <div>
+                            <van-icon :name="history.isManual?'play-circle-o':'underway-o'"></van-icon>
+                        {{ history.time }}
+                        </div>
+                    </van-cell>
+                    <!--template #right>
+                        <van-button type="danger" @click="deleteHistory(history.id)">删除</van-button>
+                    </!--template-->
+                </van-swipe-cell>
+            </van-cell-group>
+        </van-skeleton>
     </van-pull-refresh>
 </template>
 
 <script>
 import api from '../api/api'
-import { Icon, Cell, CellGroup, Row, Col, Dialog, Field, PullRefresh, Tag ,Checkbox} from 'vant';
+import {
+    Icon,
+    Cell,
+    CellGroup,
+    Row,
+    Col,
+    Dialog,
+    Field,
+    PullRefresh,
+    Tag,
+    Checkbox,
+    SwipeCell,
+    Loading,
+    Skeleton
+} from 'vant';
 export default {
     components: {
         [Icon.name]: Icon,
@@ -34,17 +58,26 @@ export default {
         [Field.name]: Field,
         [PullRefresh.name]: PullRefresh,
         [Tag.name]: Tag,
-        [Checkbox.name]:Checkbox
+        [Checkbox.name]: Checkbox,
+        [SwipeCell.name]: SwipeCell,
+        [Loading.name]: Loading,
+        [Skeleton.name]: Skeleton
     },
     mounted() {
         this.init()
+        setTimeout(
+            () => {
+                this.loading = false;
+            },
+            500)
     },
     data() {
         return {
             userNum: 0,
             jobNum: 0,
             histories: [],
-            refreshing: false
+            refreshing: false,
+            loading: true
         }
     },
     methods: {
@@ -56,7 +89,6 @@ export default {
                 },
                 1000
             );
-
         },
         init() {
             fetch(api + "/info")
@@ -82,7 +114,6 @@ export default {
                             }
                         })
                 })
-
         },
         gotoUser() {
             this.$router.push('/user');

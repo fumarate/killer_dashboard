@@ -1,23 +1,27 @@
 <template>
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-        <van-cell-group inset>
-            <van-swipe-cell v-for="user in users" :key="user.userId">
-                <van-cell>
-                    {{ user.userId }}
-                </van-cell>
-                <template #right>
-                    <van-button type="danger" @click="deleteUser(user.userId)">删除</van-button>
-                </template>
-            </van-swipe-cell>
-        </van-cell-group>
-        <div style="margin:16px">
-            <van-button type="primary" round @click="addUser" :style="{ width: '100%' }">添加用户</van-button>
-        </div>
+        <div style="height:1rem"></div>
+        <van-loading v-if="loading" type="spinner" />
+        <van-skeleton title row="3" :loading="loading">
+            <van-cell-group inset>
+                <van-swipe-cell v-for="user in users" :key="user.userId">
+                    <van-cell>
+                        {{ user.userId }}
+                    </van-cell>
+                    <template #right>
+                        <van-button type="danger" @click="deleteUser(user.userId)">删除</van-button>
+                    </template>
+                </van-swipe-cell>
+            </van-cell-group>
+            <div style="margin:16px">
+                <van-button type="primary" round @click="addUser" :style="{ width: '100%' }">添加用户</van-button>
+            </div>
+        </van-skeleton>
     </van-pull-refresh>
 </template>
 <script>
 import { default as api } from '../api/api'
-import { Button, Cell, CellGroup, Dialog, Field, SwipeCell, PullRefresh } from 'vant'
+import { Button, Cell, CellGroup, Dialog, Field, SwipeCell, PullRefresh, Loading, Skeleton } from 'vant'
 export default {
     components: {
         [Button.name]: Button,
@@ -26,18 +30,26 @@ export default {
         [Dialog.name]: Dialog,
         [Field.name]: Field,
         [SwipeCell.name]: SwipeCell,
-        [PullRefresh.name]: PullRefresh
+        [PullRefresh.name]: PullRefresh,
+        [Loading.name]: Loading,
+        [Skeleton.name]: Skeleton
     },
     data() {
         return {
             users: null,
             newUserId: "",
             newUserCaptcha: "",
-            refreshing: false
+            refreshing: false,
+            loading: true
         };
     },
     mounted() {
         this.getUser()
+        setTimeout(
+            () => {
+                this.loading = false;
+            },
+            500)
     },
     methods: {
         onRefresh() {
