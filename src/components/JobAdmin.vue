@@ -1,12 +1,9 @@
 <template>
-
-
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
         <van-dropdown-menu>
             <van-dropdown-item v-model="selectedSource" :options="sourceOption" />
         </van-dropdown-menu>
         <div style="height:1rem"></div>
-        <van-loading v-if="loading" type="spinner" />
         <van-skeleton :loading="loading" title :row="3">
             <van-cell-group inset>
                 <div v-for="(job, index) in jobs" :key="index">
@@ -189,7 +186,7 @@ export default {
             Dialog.confirm({ message: "运行任务" + id + "?" })
                 .then(() => {
                     fetch(api + "/job/" + id + "/trig", {
-                        method: "post",
+                        method: "POST",
                     })
                         .then((resp) => resp.json())
                         .then((respJson) => {
@@ -206,7 +203,7 @@ export default {
             Dialog.confirm({ message: "删除任务" + id + "?" })
                 .then(() => {
                     fetch(api + "/job/" + id, {
-                        method: "delete",
+                        method: "DELETE",
                     })
                         .then((resp) => resp.json())
                         .then((respJson) => {

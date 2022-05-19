@@ -1,15 +1,24 @@
 <template>
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
         <div style="height:1rem"></div>
-        <van-loading v-if="loading" type="spinner" />
         <van-skeleton title row="3" :loading="loading">
             <van-cell-group inset>
-                <van-swipe-cell v-for="user in users" :key="user.userId">
+                <van-swipe-cell v-for="(user, index) in users" :key="index">
                     <van-cell>
-                        {{ user.userId }}
+                        <template #title>
+                            <span>{{ user.userId }}
+                            </span>
+                        </template>
+                        <template #value>
+                            <van-tag :type="user.isTokenValid ? 'primary' : 'danger'">{{ user.isTokenValid ? 'OK' :
+                                    'INVALID'
+                            }}
+                            </van-tag>
+                        </template>
                     </van-cell>
                     <template #right>
-                        <van-button type="danger" @click="deleteUser(user.userId)">删除</van-button>
+                        <van-button @click="updateUser(index)">更新</van-button>
+                        <van-button type="danger" @click="deleteUser(index)">删除</van-button>
                     </template>
                 </van-swipe-cell>
             </van-cell-group>
@@ -21,7 +30,7 @@
 </template>
 <script>
 import { default as api } from '../api/api'
-import { Button, Cell, CellGroup, Dialog, Field, SwipeCell, PullRefresh, Loading, Skeleton } from 'vant'
+import { Button, Cell, CellGroup, Dialog, Field, SwipeCell, PullRefresh, Loading, Skeleton, Tag } from 'vant'
 export default {
     components: {
         [Button.name]: Button,
@@ -32,7 +41,8 @@ export default {
         [SwipeCell.name]: SwipeCell,
         [PullRefresh.name]: PullRefresh,
         [Loading.name]: Loading,
-        [Skeleton.name]: Skeleton
+        [Skeleton.name]: Skeleton,
+        [Tag.name]: Tag
     },
     data() {
         return {
@@ -68,12 +78,13 @@ export default {
         addUser: function () {
             this.$router.push("/user/add");
         },
-        deleteUser: function (userId) {
+        deleteUser: function (index) {
+            const user = this.users[index];
             Dialog.confirm({
-                "message": "确定删除用户" + userId + "吗？"
+                "message": "确定删除用户" + user.userId + "吗？"
             })
                 .then(() => {
-                    fetch(api + "/user/" + userId, {
+                    fetch(api + "/user/" + user.userId, {
                         method: "delete",
                     })
                         .then((resp) => resp.json())
@@ -87,6 +98,17 @@ export default {
                         });
                 })
         },
+        updateUser: function (index) {
+            const user = this.users[index];
+            this.$router.push({
+                path: "/user/add",
+                query: {
+                    userId: user.userId
+                },
+            });
+        }
     }
 }
 </script>
+<style scoped>
+</style>

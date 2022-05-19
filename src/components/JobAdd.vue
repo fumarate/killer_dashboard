@@ -2,32 +2,20 @@
     <van-form @submit="submit">
         <van-cell-group inset>
             <van-cell>
-                <van-field v-model="realSource" is-link readonly label="账号" placeholder="请选择商家" @click="selectSource">
+                <van-field v-model="accountInfo" is-link readonly label="账号" placeholder="请选择账号"
+                    @click="selectingAccount = true">
                 </van-field>
-                <van-popup v-model:show="selectingSource" round position="bottom">
-                    <van-cascader :options="sources" title="选择账号" @close="selectingSource = false"
-                        @finish="onSourceSelect">
+                <van-popup v-model:show="selectingAccount" round position="bottom">
+                    <van-cascader :options="accountOptions" title="选择账号" @close="selectingAccount = false"
+                        @finish="onAccountSelect">
                     </van-cascader>
                 </van-popup>
             </van-cell>
-            <van-cell>
-                <van-field v-model="realTarget" is-link readonly label="目标" placeholder="请选择商家" @click="selectTarget">
-                </van-field>
-                <van-popup v-model:show="selectingTarget" round position="bottom">
-                    <van-cascader :options="targets" title="选择目标" @close="selectingTarget = false"
-                        @finish="onTargetSelect">
-                    </van-cascader>
-                </van-popup>
-            </van-cell>
-
             <van-cell>
                 <van-field v-model="realShop" is-link readonly label="商家" placeholder="请选择商家" @click="selectShop">
-                    <!--template #button>
-                    <van-button @click="visitShop(newJobShopId)" size="small">查看</van-button>
-                </template-->
                 </van-field>
                 <van-popup v-model:show="selectingShop" round position="bottom">
-                    <van-cascader :options="shops" title="选择商家" @close="selectingShop = false" @finish="onShopSelect">
+                    <van-cascader :options="shops" :field-names="{text:'shop_name',value:'shop_id'}" title="选择商家" @close="selectingShop = false" @finish="onShopSelect">
                     </van-cascader>
                 </van-popup>
             </van-cell>
@@ -135,8 +123,9 @@ export default {
     },
     data() {
         return {
-            users: [],
+            accountOptions: [],
             shops: [],
+            selectingAccount:false,
             selectingSource: false,
             selectingTarget: false,
             selectingShop: false,
@@ -153,7 +142,7 @@ export default {
                 needList: {},
                 enable: true,
                 timeout: 300,
-                info:""
+                info: ""
             },
             update: false,
             hotNeedListWords: [
@@ -167,19 +156,26 @@ export default {
         fetch(api + "/school/229", { method: "GET" })
             .then((resp) => resp.json())
             .then((respJson) => {
-                this.shops = respJson.data.map((shop) => {
-                    return {
-                        value: shop.shop_id,
-                        text: shop.shop_name,
-                    }
-                });
+                this.shops = respJson.data
             });
         fetch(api + "/user", {
             method: "GET",
         })
             .then((resp) => resp.json())
             .then((respJson) => {
-                this.users = respJson.data;
+                const users = respJson.data;
+                this.accountOptions = users.map((user) => {
+                    return {
+                        value: user.userId,
+                        text: String(user.userId),
+                        children: user.addresses.map((address) => {
+                            return {
+                                value: address,
+                                text: String(address),
+                            }
+                        })
+                    }
+                });
             });
         if (this.$route.query.id) {
             this.update = true;
@@ -207,9 +203,6 @@ export default {
             this.job.timeout = Math.round(Math.pow(10, this.timeoutPow))
         }
         ,
-        selectSource() {
-            this.selectingSource = true;
-        },
         selectTarget() {
             if (this.job.source) {
                 this.selectingTarget = true;
@@ -220,14 +213,10 @@ export default {
         selectShop() {
             this.selectingShop = true;
         },
-
-        onSourceSelect(action) {
-            this.job.source = action.value;
-            this.selectingSource = false;
-        },
-        onTargetSelect(action) {
-            this.job.target = action.value;
-            this.selectingTarget = false;
+        onAccountSelect({selectedOptions}) {
+            this.job.source = selectedOptions[0].value;
+            this.job.target = selectedOptions[1].value;
+            this.selectingAccount = false;
         },
         onShopSelect(action) {
             this.job.shopId = action.value;
@@ -336,61 +325,22 @@ export default {
         },
     },
     computed: {
-        realSource() {
-            return this.job.source == null ? "未选择" : this.job.source
-        },
-        realTarget() {
-            return this.job.target == -1 ? "默认" : this.job.target
-        },
         realShop() {
             for (let i = 0; i < this.shops.length; i++) {
-                if (this.shops[i].value == this.job.shopId) {
-                    return this.shops[i].text;
+                if (this.shops[i].shop_id == this.job.shopId) {
+                    return this.shops[i].shop_name;
                 }
             }
             return null;
         },
-        sources: function () {
-            let options = new Array();
-            options.push({
-                value: "0",
-                text: "未选择"
-            });
-            this.users.map((user) => {
-                options.push(
-                    {
-                        text: user.userId,
-                        value: user.userId
-                    }
-                );
-            });
-            return options;
-        },
-        targets: function () {
-            let options = new Array();
-            options.push({
-                value: "default",
-                text: "默认"
-            });
-            let user = null;
-            for (let i = 0; i < this.users.length; i++) {
-                if (this.users[i].userId == this.job.source) {
-                    user = this.users[i];
-                    break;
-                }
+        accountInfo(){
+            if(this.job.source == null){
+                return "未选择"
             }
-            if (!user) {
-                return options;
+            if(this.job.source == this.job.target){
+                return this.job.source
             }
-            user.addresses.map((address) => {
-                options.push(
-                    {
-                        text: address,
-                        value: address
-                    }
-                );
-            });
-            return options;
+            return this.job.source + "👉" + this.job.target;
         },
         time() {
             let timeObject = moment(new Date()).hour(this.job.hour).minute(this.job.minute);
