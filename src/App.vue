@@ -1,8 +1,8 @@
 <template>
-  <van-nav-bar :title="Killer" />
+  <van-nav-bar :title="Killer" >Killer</van-nav-bar>
 
   <!--van-nav-bar v-else :title="navBarTitle" left-text="返回" left-arrow @click-left="onReturn" /-->
-  <router-view :style="{ height: '100%' }" />
+  <router-view :style="{ height: '100%'}" />
   <van-tabbar placeholder route v-model="active">
     <van-tabbar-item v-for="title in titles" replace :icon="title.icon" :key="title.title" :to="title.to" :badge="(title.badge&&(count>0))?count:null">{{ title.title
     }}

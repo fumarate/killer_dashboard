@@ -62,7 +62,8 @@ import {
     SwipeCell,
     Toast,
     Loading,
-    Skeleton
+    Skeleton,
+    List
 } from 'vant';
 import { default as api } from '../api/api'
 export default {
@@ -82,7 +83,8 @@ export default {
         [SwipeCell.name]: SwipeCell,
         [Toast.name]: Toast,
         [Loading.name]: Loading,
-        [Skeleton.name]: Skeleton
+        [Skeleton.name]: Skeleton,
+        [List.name]:List
     },
     data() {
         return {
