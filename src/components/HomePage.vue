@@ -15,7 +15,7 @@
                     </template>
                 </van-cell>
                 <van-swipe-cell v-for="history in histories" :key="history.id">
-                    <van-cell :title="history.info" center :style="{ width: '100%' }">
+                    <van-cell :title="history.info==''?'[无备注]':history.info" center :style="{ width: '100%' }">
                         <template #value>
                             <van-tag class="tag" v-if="history.status == 'SUCCESS'" type="success">
                                 {{

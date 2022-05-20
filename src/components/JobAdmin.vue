@@ -9,17 +9,30 @@
                 <div v-for="(job, index) in jobs" :key="index">
                     <div v-if="selectedSource == null ? true : job.source == selectedSource">
                         <van-swipe-cell>
-                            <van-button :style="{ width: '100%' }" @click="viewJob(index)">{{ job.source }}:{{ job.info
-                            }}
-                            </van-button>
+                            <van-cell :style="{width:'100%'}">
+                            <template #title>
+                                {{job.info==""?"[无备注]":job.info}}
+                            </template>
+                            <template #label>
+                                {{job.source}}-{{job.shopId}}-{{job.hour+":"+job.minute}}
+                                <!--moment-->
+                            </template>
+                            <template #value>
+                                <van-icon name="close"></van-icon>
+                                {{job.blackList.length?job.blackList.join(","):"[无]"}}
+                                <br>
+                                <van-icon name="passed"></van-icon>
+                                {{Object.keys(job.needList).map(key=>key+'*'+job.needList[key]).join(",")}}
+                            </template>
+                            </van-cell>
                             <template #left>
-                                <van-button type="primary" @click="editJob(job.id)">编辑</van-button>
+                                <van-button :style="{height:'100%'}" type="primary" @click="editJob(job.id)">编辑</van-button>
+                                <van-button :style="{height:'100%'}" @click="runJob(job.id)">运行</van-button>
                             </template>
                             <template #right>
-                                <van-button v-if="job.enable" @click="enableJob(job.id, 0)">关闭</van-button>
-                                <van-button v-else @click="enableJob(job.id, 1)">开启</van-button>
-                                <van-button @click="runJob(job.id)">运行</van-button>
-                                <van-button type="danger" @click="deleteJob(job.id)">删除</van-button>
+                                <van-button :style="{height:'100%'}" v-if="job.enable" @click="enableJob(job.id, 0)">关闭</van-button>
+                                <van-button :style="{height:'100%'}" v-else @click="enableJob(job.id, 1)">开启</van-button>
+                                <van-button :style="{height:'100%'}" type="danger" @click="deleteJob(job.id)">删除</van-button>
                             </template>
                         </van-swipe-cell>
                     </div>
@@ -160,20 +173,6 @@ export default {
                     });
             }
         },
-        viewJob(index) {
-            const job = this.jobs[index];
-            let info = "账号：" + job.source + "\n" + "目标：" + job.target + "\n" + "添加时间：";
-            info += job.addTime;
-            info += "\n黑名单：" + job.blackList + "\n" + "需求商品：";
-            for (var key in job.needList) {
-                info += index;
-                info += + job.needList[key] + "份\n";
-            }
-            Dialog.alert({
-                "title": "任务详情",
-                "message": info
-            })
-        },
         editJob(id) {
             this.$router.push({
                 path: "/job/add",
@@ -183,7 +182,7 @@ export default {
             });
         },
         runJob: function (id) {
-            Dialog.confirm({ message: "运行任务" + id + "?" })
+            Dialog.confirm({ message: "这个选项大部分是为了测试而预留的。如果你不是开发者，请不要手动触发，确认要触发任务" + id + "吗?" })
                 .then(() => {
                     fetch(api + "/job/" + id + "/trig", {
                         method: "POST",
