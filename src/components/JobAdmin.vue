@@ -14,7 +14,7 @@
                                 {{job.info==""?"[无备注]":job.info}}
                             </template>
                             <template #label>
-                                {{job.source}}-{{job.shopId}}-{{job.hour+":"+job.minute}}
+                                {{String(job.source).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')}}-{{job.shopId}}-{{job.hour+":"+job.minute}}
                                 <!--moment-->
                             </template>
                             <template #value>

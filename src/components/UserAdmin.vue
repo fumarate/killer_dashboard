@@ -6,7 +6,7 @@
                 <van-swipe-cell v-for="(user, index) in users" :key="index">
                     <van-cell>
                         <template #title>
-                            <span>{{ user.userId }}
+                            <span>{{ String(user.userId).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') }}
                             </span>
                         </template>
                         <template #value>

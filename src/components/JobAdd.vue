@@ -167,11 +167,11 @@ export default {
                 this.accountOptions = users.map((user) => {
                     return {
                         value: user.userId,
-                        text: String(user.userId),
+                        text: String(user.userId).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'),
                         children: user.addresses.map((address) => {
                             return {
                                 value: address,
-                                text: String(address),
+                                text: String(address).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'),
                             }
                         })
                     }

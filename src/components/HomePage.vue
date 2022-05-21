@@ -32,7 +32,7 @@
                                 <span>{{ history.time }}</span>
                             </template>
                             <template #label>
-                                <span>{{ history.userId }}</span>
+                                <span>{{ String(history.userId).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') }}</span>
                             </template>
                         </van-cell>
                         <template #right>

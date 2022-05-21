@@ -1,7 +1,8 @@
 <template>
     <van-form>
         <van-cell-group inset>
-            <van-field v-model="newUserId" label="手机号码" maxlength="11" :rules="[
+            <van-field v-if="update" v-model="maskedPhoneNumber" label="手机号码" :readonly="update"></van-field>
+            <van-field v-else v-model="newUserId" label="手机号码" maxlength="11" :rules="[
             {
                 required: true,
                 message: '请填写手机号'
@@ -115,6 +116,14 @@ export default {
                     });
             }
         },
+    },
+    computed: {
+        maskedPhoneNumber() {
+            if (this.update) {
+                return String(this.newUserId).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
+            }
+            return null;
+        }
     }
 }
 </script>
