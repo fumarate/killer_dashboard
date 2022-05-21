@@ -1,8 +1,6 @@
 <template>
-    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-        <div style="height: 1rem"></div>
+    <van-pull-refresh style="min-height: 100vh;" v-model="refreshing" @refresh="onRefresh">
         <van-skeleton :loading="entering" :row="3">
-
             <van-list v-model:loading="loading" :finished="!hasNextPage" finished-text="没有更多了" @load="onLoad"
                 immediate-check="false">
                 <van-cell-group inset>
@@ -24,6 +22,9 @@
                                     {{ history.status }}
                                 </van-tag>
                                 <van-tag class="tag" v-else-if="history.status == 'RUNNING'" type="warning">
+                                    {{ history.status }}
+                                </van-tag>
+                                <van-tag class="tag" v-else-if="history.status == 'PARTIALLY'" type="primary">
                                     {{ history.status }}
                                 </van-tag>
                                 <van-tag class="tag" v-else type="danger">

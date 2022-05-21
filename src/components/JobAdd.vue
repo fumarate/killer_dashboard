@@ -1,92 +1,89 @@
 <template>
     <van-form @submit="submit">
         <van-cell-group inset>
-            <van-cell>
-                <van-field v-model="accountInfo" is-link readonly label="账号" placeholder="请选择账号"
-                    @click="selectingAccount = true">
-                </van-field>
-                <van-popup v-model:show="selectingAccount" round position="bottom">
-                    <van-cascader :options="accountOptions" title="选择账号" @close="selectingAccount = false"
-                        @finish="onAccountSelect">
-                    </van-cascader>
-                </van-popup>
-            </van-cell>
-            <van-cell>
-                <van-field v-model="realShop" is-link readonly label="商家" placeholder="请选择商家" @click="selectShop">
-                </van-field>
-                <van-popup v-model:show="selectingShop" round position="bottom">
-                    <van-cascader :options="shops" :field-names="{text:'shop_name',value:'shop_id'}" title="选择商家" @close="selectingShop = false" @finish="onShopSelect">
-                    </van-cascader>
-                </van-popup>
-            </van-cell>
-            <van-cell>
-                <van-row class="tags" type="flex">
-                    <van-tag class="tag" v-for="(word, index) in job.blackList" :key="index" closeable type="primary"
-                        @close="removeBlackListNewWord(index)">{{ word }}</van-tag>
-                </van-row>
-                <van-field v-model="blackListNewWord" placeholder="黑名单关键词">
-                    <template #button>
-                        <van-button @click="addBlackListNewWord">添加</van-button>
-                    </template>
-                </van-field>
-            </van-cell>
-            <van-cell>
-                <van-swipe-cell v-for="(value, key) in job.needList" :key="value">
+            <van-field v-model="accountInfo" is-link readonly label="账号" placeholder="请选择账号"
+                @click="selectingAccount = true">
+            </van-field>
+            <van-popup v-model:show="selectingAccount" round position="bottom">
+                <van-cascader :options="accountOptions" title="选择账号" @close="selectingAccount = false"
+                    @finish="onAccountSelect">
+                </van-cascader>
+            </van-popup>
+            <van-field v-model="realShop" is-link readonly label="商家" placeholder="请选择商家" @click="selectShop">
+            </van-field>
+            <van-popup v-model:show="selectingShop" round position="bottom">
+                <van-cascader :options="shops" :field-names="{ text: 'shop_name', value: 'shop_id' }" title="选择商家"
+                    @close="selectingShop = false" @finish="onShopSelect">
+                </van-cascader>
+            </van-popup>
+            <van-row class="tags" type="flex">
+                <van-tag class="tag" v-for="(word, index) in job.blackList" :key="index" closeable type="primary"
+                    @close="removeBlackListNewWord(index)">{{ word }}</van-tag>
+            </van-row>
+            <van-field v-model="blackListNewWord" placeholder="黑名单关键词">
+                <template #button>
+                    <van-button @click="addBlackListNewWord">添加</van-button>
+                </template>
+            </van-field>
+            <van-swipe-cell v-for="(value, key) in job.needList" :key="value">
+                <van-cell :style="{ width: '100%' }">
                     <van-field :label="key" readonly>
                         <template #button>
                             <van-stepper v-model="job.needList[key]" integer min="1" theme="round"></van-stepper>
                         </template>
                     </van-field>
-                    <template #right>
-                        <van-button type="danger" @click="removeNeedListNewWord(key)">删除</van-button>
-                    </template>
-                </van-swipe-cell>
-                <van-field v-model="needListNewWord" placeholder="需求关键词">
-                    <template #button>
-                        <van-button @click="addNeedListNewWord">添加</van-button>
-                    </template>
-                </van-field>
-                <van-row class="tags" type="flex">
-                    <van-tag class="tag" v-for="(word, index) in hotNeedListWords" :key="index" type="warning"
-                        @click="needListNewWord = word">{{ word }}</van-tag>
-                </van-row>
-            </van-cell>
+                </van-cell>
 
-            <van-cell>
-                <van-field v-model="time" is-link readonly label="时间" placeholder="请选择时间" @click="selectingTime = true">
-                </van-field>
-                <van-popup v-model:show="selectingTime" round position="bottom">
-                    <van-datetime-picker v-model="currentTime" type="time" title="选择时间" @confirm="onTimeSelect"
-                        @cancel="selectingTime = false" />
-                </van-popup>
-            </van-cell>
-            <van-cell>
-                <van-field readonly label="超时">
-                    <template #input>
-                        <van-slider v-model="timeoutPow" :min="0" :max="3" :step="0.001" class="timeout"
-                            @change="onTimeoutChange">
-                            <template #button>
-                                <van-tag class="tag" type="primary" round>{{ Math.round(Math.pow(10, timeoutPow)) }}
-                                </van-tag>
-                            </template>
-                        </van-slider>
-                    </template>
-                </van-field>
+                <template #right>
+                    <van-button :style="{ height: '100%' }" type="danger" @click="removeNeedListNewWord(key)">删除
+                    </van-button>
+                </template>
+            </van-swipe-cell>
+            <van-field v-model="needListNewWord" placeholder="需求关键词">
+                <template #button>
+                    <van-button @click="addNeedListNewWord">添加</van-button>
+                </template>
+            </van-field>
+            <van-row class="tags" type="flex">
+                <van-tag class="tag" v-for="(word, index) in hotNeedListWords" :key="index" type="warning"
+                    @click="needListNewWord = word">{{ word }}</van-tag>
+            </van-row>
 
-            </van-cell>
+            <van-field v-model="time" is-link readonly label="时间" placeholder="请选择时间" @click="selectingTime = true">
+            </van-field>
+            <van-popup v-model:show="selectingTime" round position="bottom">
+                <van-datetime-picker v-model="currentTime" type="time" title="选择时间" @confirm="onTimeSelect"
+                    @cancel="selectingTime = false" />
+            </van-popup>
+            <van-field readonly label="超时">
+                <template #input>
+                    <van-slider v-model="timeoutPow" :min="0" :max="3" :step="0.001" class="timeout"
+                        @change="onTimeoutChange">
+                        <template #button>
+                            <van-tag class="tag" type="primary" round>{{ Math.round(Math.pow(10, timeoutPow)) }}
+                            </van-tag>
+                        </template>
+                    </van-slider>
+                </template>
+            </van-field>
 
-            <van-cell inset v-if="update">
-                <van-field readonly label="运行状态" @click="job.enable = !job.enable">
-                    <template #right-icon>
-                        <van-switch v-model="job.enable" size="20" @click="job.enable = !job.enable"></van-switch>
-                    </template>
-                </van-field>
-            </van-cell>
-            <van-cell>
-                <van-field label="备注" v-model="job.info">
+            <van-field label="备注" v-model="job.info">
 
-                </van-field>
+            </van-field>
+            <van-field readonly label="运行状态" @click="job.enable = !job.enable">
+                <template #right-icon>
+                    <van-switch v-model="job.enable" size="20" @click="job.enable = !job.enable"></van-switch>
+                </template>
+            </van-field>
+            <van-cell center>
+               <van-radio-group v-model="job.mode" direction="horizontal">
+                <van-radio :name="1">触发一次</van-radio>
+                <van-radio :name="2">直到成功</van-radio>
+                <van-radio :name="3">持续触发</van-radio>
+            </van-radio-group> 
             </van-cell>
+            
+
         </van-cell-group>
         <div style="margin:16px">
             <van-button type="primary" native-type="submit" round v-if="update" :style="{ width: '100%' }">更新
@@ -98,7 +95,27 @@
 
 <script>
 import * as moment from 'moment';
-import { Button, Cascader, Cell, CellGroup, DatetimePicker, Dialog, Field, Form, Popover, Popup, Stepper, Switch, SwipeCell, Tag, Col, Row, Slider } from 'vant'
+import {
+    Button,
+    Cascader,
+    Cell,
+    CellGroup,
+    DatetimePicker,
+    Dialog,
+    Field,
+    Form,
+    Popover,
+    Popup,
+    Stepper,
+    Switch,
+    SwipeCell,
+    Tag,
+    Col,
+    Row,
+    Slider,
+    Radio,
+    RadioGroup
+} from 'vant'
 import { default as api } from '../api/api'
 
 export default {
@@ -119,13 +136,15 @@ export default {
         [Stepper.name]: Stepper,
         [Switch.name]: Switch,
         [SwipeCell.name]: SwipeCell,
-        [Slider.name]: Slider
+        [Slider.name]: Slider,
+        [RadioGroup.name]: RadioGroup,
+        [Radio.name]: Radio
     },
     data() {
         return {
             accountOptions: [],
             shops: [],
-            selectingAccount:false,
+            selectingAccount: false,
             selectingSource: false,
             selectingTarget: false,
             selectingShop: false,
@@ -142,7 +161,8 @@ export default {
                 needList: {},
                 enable: true,
                 timeout: 300,
-                info: ""
+                info: "",
+                mode: 1
             },
             update: false,
             hotNeedListWords: [
@@ -213,7 +233,7 @@ export default {
         selectShop() {
             this.selectingShop = true;
         },
-        onAccountSelect({selectedOptions}) {
+        onAccountSelect({ selectedOptions }) {
             this.job.source = selectedOptions[0].value;
             this.job.target = selectedOptions[1].value;
             this.selectingAccount = false;
@@ -274,6 +294,9 @@ export default {
         },
         addJob: function () {
             if (this.job.source != null && this.job.needList != {}) {
+                if (this.job.info == "") {
+                    this.job.info = Object.keys(this.job.needList).map(key => key + '*' + this.job.needList[key]).join(",");
+                }
                 Dialog.confirm({ message: "添加任务?" })
                     .then(() => {
                         fetch(api + "/job", {
@@ -289,7 +312,6 @@ export default {
                                     Dialog.alert({ message: "添加成功。" })
                                         .then(() => {
                                             this.$router.back()
-
                                         });
                                 } else {
                                     Dialog.alert({ message: respJson.exception });
@@ -333,14 +355,14 @@ export default {
             }
             return null;
         },
-        accountInfo(){
-            if(this.job.source == null){
+        accountInfo() {
+            if (this.job.source == null) {
                 return "未选择"
             }
-            if(this.job.source == this.job.target){
-                return this.job.source
+            if (this.job.source == this.job.target) {
+                return String(this.job.source).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
             }
-            return this.job.source + "👉" + this.job.target;
+            return String(this.job.source).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') + "👉" + String(this.job.target).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
         },
         time() {
             let timeObject = moment(new Date()).hour(this.job.hour).minute(this.job.minute);

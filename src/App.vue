@@ -1,51 +1,54 @@
 <template>
-  <van-nav-bar :title="Killer" >Killer</van-nav-bar>
-
-  <!--van-nav-bar v-else :title="navBarTitle" left-text="返回" left-arrow @click-left="onReturn" /-->
-  <router-view :style="{ height: '100%'}" />
-  <van-tabbar placeholder route v-model="active">
-    <van-tabbar-item v-for="title in titles" replace :icon="title.icon" :key="title.title" :to="title.to" :badge="(title.badge&&(count>0))?count:null">{{ title.title
-    }}
-    </van-tabbar-item>
-  </van-tabbar>
-
+  <van-config-provider>
+    <van-nav-bar :title="Killer">Killer</van-nav-bar>
+    <div style="height:1rem"></div>
+    <!--van-nav-bar v-else :title="navBarTitle" left-text="返回" left-arrow @click-left="onReturn" /-->
+    <router-view id="rv" />
+    <van-tabbar placeholder route v-model="active">
+      <van-tabbar-item v-for="title in titles" replace :icon="title.icon" :key="title.title" :to="title.to"
+        :badge="(title.badge && (count > 0)) ? count : null">{{ title.title
+        }}
+      </van-tabbar-item>
+    </van-tabbar>
+  </van-config-provider>
 </template>
 
 <script>
 import '@/assets/css/global.scss'
-import { NavBar, Tabbar, TabbarItem } from 'vant';
+import { NavBar, Tabbar, TabbarItem, ConfigProvider } from 'vant';
 import api from '@/api/api'
 export default {
   name: 'App',
   components: {
     [NavBar.name]: NavBar,
     [Tabbar.name]: Tabbar,
-    [TabbarItem.name]: TabbarItem
+    [TabbarItem.name]: TabbarItem,
+    [ConfigProvider.name]: ConfigProvider
   },
   mounted() {
-fetch(api + "/history")
-            .then(resp => resp.json())
-            .then(respJson => {
-              let count=0;
-                for(var i=0;i<respJson.data.length;i++){
-                    if(!respJson.data[i].checked){
-                        count+=1;
-                    }
-                }
-                this.count=count;
-            })
+    fetch(api + "/history")
+      .then(resp => resp.json())
+      .then(respJson => {
+        let count = 0;
+        for (var i = 0; i < respJson.data.length; i++) {
+          if (!respJson.data[i].checked) {
+            count += 1;
+          }
+        }
+        this.count = count;
+      })
 
   },
   data() {
     return {
       active: 0,
-      count:0,
+      count: 0,
       titles: [
         {
           title: '主页',
           to: '/',
           icon: 'home-o',
-          badge:true
+          badge: true
         },
         {
           title: '任务',
@@ -62,7 +65,10 @@ fetch(api + "/history")
           to: '/settings',
           icon: 'setting-o'
         }
-      ]
+      ],
+      config: {
+
+      }
     }
   },
   methods: {
@@ -82,7 +88,7 @@ fetch(api + "/history")
       return backslash <= 1
     },
     navBarTitle() {
-      for (let i = this.titles.length-1; i >=0; i--) {
+      for (let i = this.titles.length - 1; i >= 0; i--) {
         if (this.$route.path.startsWith(this.titles[i].to)) {
           return this.titles[i].title;
         }
@@ -94,7 +100,6 @@ fetch(api + "/history")
 </script>
 
 <style>
-
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

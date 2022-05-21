@@ -1,38 +1,44 @@
 <template>
-    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-        <van-dropdown-menu>
+    <van-pull-refresh style="min-height: 100vh;" v-model="refreshing" @refresh="onRefresh">
+        <!--van-dropdown-menu>
             <van-dropdown-item v-model="selectedSource" :options="sourceOption" />
-        </van-dropdown-menu>
-        <div style="height:1rem"></div>
+        </!--van-dropdown-menu-->
         <van-skeleton :loading="loading" title :row="3">
             <van-cell-group inset>
                 <div v-for="(job, index) in jobs" :key="index">
                     <div v-if="selectedSource == null ? true : job.source == selectedSource">
                         <van-swipe-cell>
-                            <van-cell :style="{width:'100%'}">
-                            <template #title>
-                                {{job.info==""?"[无备注]":job.info}}
-                            </template>
-                            <template #label>
-                                {{String(job.source).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')}}-{{job.shopId}}-{{job.hour+":"+job.minute}}
-                                <!--moment-->
-                            </template>
-                            <template #value>
-                                <van-icon name="close"></van-icon>
-                                {{job.blackList.length?job.blackList.join(","):"[无]"}}
-                                <br>
-                                <van-icon name="passed"></van-icon>
-                                {{Object.keys(job.needList).map(key=>key+'*'+job.needList[key]).join(",")}}
-                            </template>
+                            <van-cell :style="{ width: '100%' }">
+                                <template #title>
+                                    <van-tag :type="job.enable ? 'success' : 'danger'">{{ job.enable ? "运行" : "停止" }}</van-tag>
+                                    {{ job.info == "" ? "[无备注]" : job.info }}
+                                </template>
+                                <template #label>
+                                    {{ String(job.source).replace(/(\d{3})\d{4}(\d{4})/,
+                                            '$1****$2')
+                                    }}-{{ job.shopId }}-{{ job.hour + ":" + job.minute }}
+                                    <!--moment-->
+                                </template>
+                                <template #value>
+                                    <van-icon name="close"></van-icon>
+                                    {{ job.blackList.length ? job.blackList.join(",") : "[无]" }}
+                                    <br>
+                                    <van-icon name="passed"></van-icon>
+                                    {{ Object.keys(job.needList).map(key => key + '*' + job.needList[key]).join(",") }}
+                                </template>
                             </van-cell>
                             <template #left>
-                                <van-button :style="{height:'100%'}" type="primary" @click="editJob(job.id)">编辑</van-button>
-                                <van-button :style="{height:'100%'}" @click="runJob(job.id)">运行</van-button>
+                                <van-button :style="{ height: '100%' }" type="primary" @click="editJob(job.id)">编辑
+                                </van-button>
+                                <van-button :style="{ height: '100%' }" @click="runJob(job.id)">运行</van-button>
                             </template>
                             <template #right>
-                                <van-button :style="{height:'100%'}" v-if="job.enable" @click="enableJob(job.id, 0)">关闭</van-button>
-                                <van-button :style="{height:'100%'}" v-else @click="enableJob(job.id, 1)">开启</van-button>
-                                <van-button :style="{height:'100%'}" type="danger" @click="deleteJob(job.id)">删除</van-button>
+                                <van-button :style="{ height: '100%' }" v-if="job.enable" @click="enableJob(job.id, 0)">关闭
+                                </van-button>
+                                <van-button :style="{ height: '100%' }" v-else @click="enableJob(job.id, 1)">开启
+                                </van-button>
+                                <van-button :style="{ height: '100%' }" type="danger" @click="deleteJob(job.id)">删除
+                                </van-button>
                             </template>
                         </van-swipe-cell>
                     </div>
@@ -50,6 +56,7 @@ import {
     Button,
     Cell,
     CellGroup,
+    Checkbox,
     Collapse,
     CollapseItem,
     DropdownMenu,
@@ -63,7 +70,8 @@ import {
     Toast,
     Loading,
     Skeleton,
-    List
+    List,
+    Tag
 } from 'vant';
 import { default as api } from '../api/api'
 export default {
@@ -71,6 +79,7 @@ export default {
         [Button.name]: Button,
         [Cell.name]: Cell,
         [CellGroup.name]: CellGroup,
+        [Checkbox.name]: Checkbox,
         [Collapse.name]: Collapse,
         [CollapseItem.name]: CollapseItem,
         [DropdownMenu.name]: DropdownMenu,
@@ -84,7 +93,8 @@ export default {
         [Toast.name]: Toast,
         [Loading.name]: Loading,
         [Skeleton.name]: Skeleton,
-        [List.name]:List
+        [List.name]: List,
+        [Tag.name]: Tag
     },
     data() {
         return {
@@ -170,7 +180,7 @@ export default {
                     .then((respJson) => {
                         if (respJson.status) {
                             Toast("任务更新成功!")
-                            this.onRefresh();
+                            this.getJob();
                         }
                     });
             }

@@ -1,6 +1,5 @@
 <template>
-    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-        <div style="height:1rem"></div>
+    <van-pull-refresh style="min-height: 100vh;" v-model="refreshing" @refresh="onRefresh">
         <van-skeleton title row="3" :loading="loading">
             <van-cell-group inset>
                 <van-swipe-cell v-for="(user, index) in users" :key="index">
