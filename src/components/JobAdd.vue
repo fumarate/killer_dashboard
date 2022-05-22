@@ -26,6 +26,10 @@
                 </template>
             </van-field>
             <van-swipe-cell v-for="(value, key) in job.needList" :key="value">
+                <template #left>
+                    <van-button :style="{ height: '100%' }" type="primary" @click="testNeedItem(key)">测试
+                    </van-button>
+                </template>
                 <van-cell :style="{ width: '100%' }">
                     <van-field :label="key" readonly>
                         <template #button>
@@ -49,11 +53,11 @@
                     @click="needListNewWord = word">{{ word }}</van-tag>
             </van-row>
 
-            <van-field v-model="time" is-link readonly label="时间" placeholder="请选择时间" @click="selectingTime = true">
+            <van-field v-model="time" is-link readonly label="时间" placeholder="请选择时间" @click="selectTime">
             </van-field>
             <van-popup v-model:show="selectingTime" round position="bottom">
-                <van-datetime-picker v-model="currentTime" type="time" title="选择时间" @confirm="onTimeSelect"
-                    @cancel="selectingTime = false" />
+                <van-datetime-picker ref="timePicker" v-model="currentTime" type="time" title="选择时间"
+                    @confirm="onTimeSelect" @cancel="selectingTime = false" />
             </van-popup>
             <van-field readonly label="超时">
                 <template #input>
@@ -76,13 +80,13 @@
                 </template>
             </van-field>
             <van-cell center>
-               <van-radio-group v-model="job.mode" direction="horizontal">
-                <van-radio :name="1">触发一次</van-radio>
-                <van-radio :name="2">直到成功</van-radio>
-                <van-radio :name="3">持续触发</van-radio>
-            </van-radio-group> 
+                <van-radio-group v-model="job.mode" direction="horizontal">
+                    <van-radio :name="1">触发一次</van-radio>
+                    <van-radio :name="2">直到成功</van-radio>
+                    <van-radio :name="3">持续触发</van-radio>
+                </van-radio-group>
             </van-cell>
-            
+
 
         </van-cell-group>
         <div style="margin:16px">
@@ -207,7 +211,6 @@ export default {
                     this.job = respJson.data;
                     this.timeoutPow = Math.log10(this.job.timeout);
                 })
-            console.log(this.job)
         }
         this.loading = false;
     },
@@ -218,6 +221,15 @@ export default {
             } else {
                 this.addJob();
             }
+        },
+        selectTime() {
+            this.selectingTime = true;
+            let timePicker;
+            this.$nextTick(() => {
+                timePicker = this.$refs.timePicker.getPicker();
+                timePicker.setColumnIndex(0, this.job.hour);
+                timePicker.setColumnIndex(1, this.job.minute);
+            })
         },
         onTimeoutChange() {
             this.job.timeout = Math.round(Math.pow(10, this.timeoutPow))
@@ -246,6 +258,9 @@ export default {
             this.job.hour = Number(action.split(":")[0]);
             this.job.minute = Number(action.split(":")[1]);
             this.selectingTime = false;
+            const timePicker = this.$refs.timePicker.getPicker();
+            timePicker.setColumnIndex(0, this.job.hour);
+            timePicker.setColumnIndex(1, this.job.minute);
         },
         addBlackListNewWord() {
             if (!this.blackListNewWord) return;
@@ -339,12 +354,28 @@ export default {
 
                                     });
                             } else {
-                                Dialog.alert({ message: respJson.exception });
+                                Dialog.alert({ message: respJson.message });
                             }
                         });
                 })
 
         },
+        testNeedItem(keyWord) {
+            fetch(api + "/testNeedItem?shopId=" + this.job.shopId + "&keyWord=" + keyWord)
+                .then((resp) => resp.json())
+                .then((respJson) => {
+                    if (respJson.status) {
+                        let message = "关键词：" + keyWord + "\n";
+                        respJson.data.forEach((item) => {
+                            message += "命中：" + item.tag + "-" + item.name + "\n";
+                            message += "价格：" + item.price + "库存：" + item.stock + "\n";
+                        })
+                        Dialog.alert({ message: message })
+                    } else {
+                        Dialog.alert({ message: respJson.message })
+                    }
+                })
+        }
     },
     computed: {
         realShop() {
