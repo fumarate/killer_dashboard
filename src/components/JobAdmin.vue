@@ -10,7 +10,8 @@
                         <van-swipe-cell>
                             <van-cell :style="{ width: '100%' }">
                                 <template #title>
-                                    <van-tag :type="job.enable ? 'success' : 'danger'">{{ job.enable ? "运行" : "停止" }}</van-tag>
+                                    <van-tag :type="job.enable ? 'success' : 'danger'">{{ job.enable ? "运行" : "停止" }}
+                                    </van-tag>
                                     {{ job.info == "" ? "[无备注]" : job.info }}
                                 </template>
                                 <template #label>
@@ -33,7 +34,8 @@
                                 <van-button :style="{ height: '100%' }" @click="runJob(job.id)">运行</van-button>
                             </template>
                             <template #right>
-                                <van-button :style="{ height: '100%' }" v-if="job.enable" @click="enableJob(job.id, 0)">关闭
+                                <van-button :style="{ height: '100%' }" v-if="job.enable" @click="enableJob(job.id, 0)">
+                                    关闭
                                 </van-button>
                                 <van-button :style="{ height: '100%' }" v-else @click="enableJob(job.id, 1)">开启
                                 </van-button>
@@ -163,7 +165,15 @@ export default {
                     for (let i = 0; i < this.jobs.length; i++) {
                         if (this.jobs[i].id == id) {
                             this.jobs[i].enable = enable;
-                            this.putJob(this.jobs[i]);
+                            fetch(api + "/job/" + id + "/" + enable ? "resume" : "pause")
+                                .then((resp) => resp.json())
+                                .then((respJson) => {
+                                    if (respJson.code == 0) {
+                                        Toast((enable ? "启动" : "停止") + "任务成功");
+                                    } else {
+                                        Toast((enable ? "启动" : "停止") + "任务失败");
+                                    }
+                                })
                         }
                     }
                 })

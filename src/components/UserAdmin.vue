@@ -9,7 +9,7 @@
                             </span>
                         </template>
                         <template #value>
-                            <van-tag :type="user.isTokenValid ? 'primary' : 'danger'">{{ user.isTokenValid ? 'OK' :
+                            <van-tag :type="user.tokenValid ? 'primary' : 'danger'">{{ user.tokenValid ? 'OK' :
                                     'INVALID'
                             }}
                             </van-tag>

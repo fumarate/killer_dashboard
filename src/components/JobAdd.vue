@@ -192,7 +192,7 @@ export default {
                     return {
                         value: user.userId,
                         text: String(user.userId).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'),
-                        children: user.addresses.map((address) => {
+                        children: user.addressList.map((address) => {
                             return {
                                 value: address,
                                 text: String(address).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'),
