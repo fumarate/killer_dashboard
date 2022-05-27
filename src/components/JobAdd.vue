@@ -12,7 +12,7 @@
             <van-field v-model="realShop" is-link readonly label="商家" placeholder="请选择商家" @click="selectShop">
             </van-field>
             <van-popup v-model:show="selectingShop" round position="bottom">
-                <van-cascader :options="shops" :field-names="{ text: 'shop_name', value: 'shop_id' }" title="选择商家"
+                <van-cascader :options="shops" :field-names="{ text: 'shopName', value: 'shopId' }" title="选择商家"
                     @close="selectingShop = false" @finish="onShopSelect">
                 </van-cascader>
             </van-popup>
@@ -180,7 +180,7 @@ export default {
         fetch(api + "/school/229", { method: "GET" })
             .then((resp) => resp.json())
             .then((respJson) => {
-                this.shops = respJson.data
+                this.shops = respJson.data.shops
             });
         fetch(api + "/user", {
             method: "GET",
@@ -380,8 +380,8 @@ export default {
     computed: {
         realShop() {
             for (let i = 0; i < this.shops.length; i++) {
-                if (this.shops[i].shop_id == this.job.shopId) {
-                    return this.shops[i].shop_name;
+                if (this.shops[i].shopId == this.job.shopId) {
+                    return this.shops[i].shopName;
                 }
             }
             return null;
