@@ -11,37 +11,37 @@ const routes = [
     path: "/",
     name: "主页",
     component: HomePage,
-    meta:{title:"主页"},
+    meta: { title: "主页" },
   },
   {
     path: "/job",
     name: "Job",
     component: JobAdmin,
-    meta:{title:"任务"},
+    meta: { title: "任务" },
   },
   {
     path: "/user",
     name: "User",
     component: UserAdmin,
-    meta:{title:"用户"},
+    meta: { title: "用户" },
   },
   {
     path: "/settings",
     name: "Settings",
     component: SettingsAdmin,
-    meta:{title:"设置"},
+    meta: { title: "设置" },
   },
   {
     path: "/job/add",
     name: "JobAdd",
     component: JobAdd,
-    meta:{title:"添加任务"},
+    meta: { title: "添加任务" },
   },
   {
     path: "/user/add",
     name: "userAdd",
     component: UserAdd,
-    meta:{title:"添加用户"},
+    meta: { title: "添加用户" },
   },
 ];
 
@@ -50,12 +50,11 @@ const route = createRouter({
   routes,
 });
 
-
-route.beforeEach((to,from,next)=>{
-  if(to.meta.title){
-      document.title = to.meta.title
+route.beforeEach((to, from, next) => {
+  if (to.meta.title) {
+    document.title = to.meta.title;
   }
-  next()
-})
+  next();
+});
 
 export default route;

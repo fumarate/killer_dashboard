@@ -99,51 +99,9 @@
 
 <script>
 import * as moment from 'moment';
-import {
-    Button,
-    Cascader,
-    Cell,
-    CellGroup,
-    DatetimePicker,
-    Dialog,
-    Field,
-    Form,
-    Popover,
-    Popup,
-    Stepper,
-    Switch,
-    SwipeCell,
-    Tag,
-    Col,
-    Row,
-    Slider,
-    Radio,
-    RadioGroup
-} from 'vant'
 import { default as api } from '../api/api'
 
 export default {
-    components: {
-        [Button.name]: Button,
-        [Cascader.name]: Cascader,
-        [Cell.name]: Cell,
-        [CellGroup.name]: CellGroup,
-        [DatetimePicker.name]: DatetimePicker,
-        [Dialog.Component.name]: Dialog.Component,
-        [Field.name]: Field,
-        [Form.name]: Form,
-        [Popover.name]: Popover,
-        [Popup.name]: Popup,
-        [Col.name]: Col,
-        [Row.name]: Row,
-        [Tag.name]: Tag,
-        [Stepper.name]: Stepper,
-        [Switch.name]: Switch,
-        [SwipeCell.name]: SwipeCell,
-        [Slider.name]: Slider,
-        [RadioGroup.name]: RadioGroup,
-        [Radio.name]: Radio
-    },
     data() {
         return {
             accountOptions: [],

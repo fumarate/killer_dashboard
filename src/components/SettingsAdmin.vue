@@ -3,14 +3,8 @@
 </template>
 
 <script>
-import { Cell, CellGroup, Field, Slider } from 'vant';
 export default {
-    components: {
-        [Cell.name]: Cell,
-        [CellGroup.name]: CellGroup,
-        [Field.name]: Field,
-        [Slider.name]: Slider
-    },
+
 
     data() {
         return {

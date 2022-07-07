@@ -29,20 +29,7 @@
 </template>
 <script>
 import { default as api } from '../api/api'
-import { Button, Cell, CellGroup, Dialog, Field, SwipeCell, PullRefresh, Loading, Skeleton, Tag } from 'vant'
 export default {
-    components: {
-        [Button.name]: Button,
-        [Cell.name]: Cell,
-        [CellGroup.name]: CellGroup,
-        [Dialog.name]: Dialog,
-        [Field.name]: Field,
-        [SwipeCell.name]: SwipeCell,
-        [PullRefresh.name]: PullRefresh,
-        [Loading.name]: Loading,
-        [Skeleton.name]: Skeleton,
-        [Tag.name]: Tag
-    },
     data() {
         return {
             users: null,

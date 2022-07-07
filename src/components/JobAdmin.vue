@@ -54,50 +54,10 @@
 </template>
 
 <script>
-import {
-    Button,
-    Cell,
-    CellGroup,
-    Checkbox,
-    Collapse,
-    CollapseItem,
-    DropdownMenu,
-    DropdownItem,
-    DatetimePicker,
-    Dialog,
-    Field,
-    Popup,
-    PullRefresh,
-    SwipeCell,
-    Toast,
-    Loading,
-    Skeleton,
-    List,
-    Tag
-} from 'vant';
+
 import { default as api } from '../api/api'
 export default {
-    components: {
-        [Button.name]: Button,
-        [Cell.name]: Cell,
-        [CellGroup.name]: CellGroup,
-        [Checkbox.name]: Checkbox,
-        [Collapse.name]: Collapse,
-        [CollapseItem.name]: CollapseItem,
-        [DropdownMenu.name]: DropdownMenu,
-        [DropdownItem.name]: DropdownItem,
-        [DatetimePicker.name]: DatetimePicker,
-        [Dialog.Component.name]: Dialog.Component,
-        [Field.name]: Field,
-        [Popup.name]: Popup,
-        [PullRefresh.name]: PullRefresh,
-        [SwipeCell.name]: SwipeCell,
-        [Toast.name]: Toast,
-        [Loading.name]: Loading,
-        [Skeleton.name]: Skeleton,
-        [List.name]: List,
-        [Tag.name]: Tag
-    },
+    
     data() {
         return {
             adding: false,

@@ -32,17 +32,8 @@
 
 <script>
 import { default as api } from '../api/api'
-import { Button, Cell, CellGroup, Dialog, Field, Form, SwipeCell } from 'vant'
 export default {
-    components: {
-        [Button.name]: Button,
-        [Cell.name]: Cell,
-        [CellGroup.name]: CellGroup,
-        [Dialog.name]: Dialog,
-        [Field.name]: Field,
-        [SwipeCell.name]: SwipeCell,
-        [Form.name]: Form
-    },
+
     data() {
         return {
             newUserId: "",

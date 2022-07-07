@@ -10,21 +10,15 @@
         }}
       </van-tabbar-item>
     </van-tabbar>
+
   </van-config-provider>
 </template>
 
 <script>
-import '@/assets/css/global.scss'
-import { NavBar, Tabbar, TabbarItem, ConfigProvider } from 'vant';
-import api from '@/api/api'
+import './assets/css/global.scss'
+import api from './api/api.js'
 export default {
   name: 'App',
-  components: {
-    [NavBar.name]: NavBar,
-    [Tabbar.name]: Tabbar,
-    [TabbarItem.name]: TabbarItem,
-    [ConfigProvider.name]: ConfigProvider
-  },
   mounted() {
     fetch(api + "/history")
       .then(resp => resp.json())

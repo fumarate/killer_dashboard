@@ -49,39 +49,8 @@
 
 <script>
 import api from "../api/api";
-import {
-    Icon,
-    Cell,
-    CellGroup,
-    Row,
-    Col,
-    Dialog,
-    Field,
-    PullRefresh,
-    Tag,
-    SwipeCell,
-    Loading,
-    Skeleton,
-    Button,
-    List,
-} from "vant";
+
 export default {
-    components: {
-        [Icon.name]: Icon,
-        [Cell.name]: Cell,
-        [CellGroup.name]: CellGroup,
-        [Row.name]: Row,
-        [Col.name]: Col,
-        [Dialog.name]: Dialog,
-        [Field.name]: Field,
-        [PullRefresh.name]: PullRefresh,
-        [Tag.name]: Tag,
-        [SwipeCell.name]: SwipeCell,
-        [Loading.name]: Loading,
-        [Skeleton.name]: Skeleton,
-        [Button.name]: Button,
-        [List.name]: List,
-    },
     mounted() {
         this.init();
         setTimeout(() => {
