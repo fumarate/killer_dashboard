@@ -1,5 +1,5 @@
 <template>
-  <van-config-provider>
+  <van-config-provider :theme="theme">
     <van-nav-bar :title="Killer">Killer</van-nav-bar>
     <div style="height:1rem"></div>
     <!--van-nav-bar v-else :title="navBarTitle" left-text="返回" left-arrow @click-left="onReturn" /-->
@@ -10,7 +10,6 @@
         }}
       </van-tabbar-item>
     </van-tabbar>
-
   </van-config-provider>
 </template>
 
@@ -20,18 +19,6 @@ import api from './api/api.js'
 export default {
   name: 'App',
   mounted() {
-    fetch(api + "/history")
-      .then(resp => resp.json())
-      .then(respJson => {
-        let count = 0;
-        for (var i = 0; i < respJson.data.length; i++) {
-          if (!respJson.data[i].checked) {
-            count += 1;
-          }
-        }
-        this.count = count;
-      })
-
   },
   data() {
     return {
@@ -50,11 +37,6 @@ export default {
           icon: 'search'
         },
         {
-          title: '用户',
-          to: '/user',
-          icon: 'friends-o'
-        },
-        {
           title: '设置',
           to: '/settings',
           icon: 'setting-o'
@@ -71,6 +53,9 @@ export default {
     }
   },
   computed: {
+    theme(){
+      return 'light';
+    },
     isBase() {
       let backslash = 0;
       const path = this.$route.path;

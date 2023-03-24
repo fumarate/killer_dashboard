@@ -1,187 +1,152 @@
 <template>
-    <van-pull-refresh style="min-height: 100vh;" v-model="refreshing" @refresh="onRefresh">
-        <van-skeleton :loading="entering" :row="3">
-            <van-list v-model:loading="loading" :finished="!hasNextPage" finished-text="没有更多了" @load="onLoad"
-                immediate-check="false">
-                <van-cell-group inset>
-                    <van-cell center is-link :value="user + ' user(s) in Total'" @click="gotoUser">
-                        <template #title>
-                            <van-icon name="user-circle-o" size="30" />
-                        </template>
-                    </van-cell>
-                    <van-cell center is-link :value="job + ' job(s) in Total'" @click="gotoJob">
-                        <template #title>
-                            <van-icon name="orders-o" size="30" />
-                        </template>
-                    </van-cell>
-                    <van-swipe-cell v-for="history in histories" :key="history.id">
-                        <van-cell :title="history.info == '' ? '[无备注]' : history.info" center
-                            :style="{ width: '100%' }">
-                            <template #value>
-                                <van-tag class="tag" v-if="history.status == 'SUCCESS'" type="success">
-                                    {{ history.status }}
-                                </van-tag>
-                                <van-tag class="tag" v-else-if="history.status == 'RUNNING'" type="warning">
-                                    {{ history.status }}
-                                </van-tag>
-                                <van-tag class="tag" v-else-if="history.status == 'PARTIALLY'" type="primary">
-                                    {{ history.status }}
-                                </van-tag>
-                                <van-tag class="tag" v-else type="danger">
-                                    {{ history.status }} </van-tag><br />
-                                <van-icon :name="history.isManual ? 'play-circle-o' : 'underway-o'"></van-icon>
-                                <span>{{ history.time }}</span>
-                            </template>
-                            <template #label>
-                                <span>{{ String(history.userId).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') }}</span>
-                            </template>
-                        </van-cell>
-                        <template #right>
-                            <van-button type="danger" @click="deleteHistory(history.id)" :style="{ height: '100%' }">删除
-                            </van-button>
-                        </template>
-                    </van-swipe-cell>
-                </van-cell-group>
-            </van-list>
-        </van-skeleton>
-    </van-pull-refresh>
+  <van-pull-refresh
+    style="min-height: 100vh"
+    v-model="refreshing"
+    @refresh="onRefresh"
+  >
+    <van-skeleton :loading="entering" :row="3">
+      <!-- <van-list
+        v-model:loading="loading"
+        :finished="!hasNextPage"
+        finished-text="没有更多了"
+        @load="onLoad"
+        immediate-check="false"
+      > -->
+      <van-cell-group inset>
+        <van-cell
+          center
+          is-link
+          :value="jobNum + ' job(s) in Total'"
+          @click="gotoJob"
+        >
+          <template #title>
+            <van-icon name="orders-o" size="30" />
+          </template>
+        </van-cell>
+        <div v-for="(job, index) in jobs" :key="index">
+          <van-swipe-cell>
+            <van-cell :style="{ width: '100%' }">
+              <template #title>
+                <van-tag :type="job.is_on ? 'success' : 'danger'"
+                  >{{ job.is_on ? "运行" : "停止" }}
+                </van-tag>
+                {{
+                  job.job_name == ""
+                    ? "[无备注]"
+                    : job.job_name.length >= 20
+                    ? job.job_name.slice(20)
+                    : job.job_name
+                }}
+              </template>
+              <template #label>
+                <van-tag
+                  :type="
+                    statusIdToTypeAndString(job.last_run_status.run_status)
+                      .tag_type
+                  "
+                  >{{
+                    statusIdToTypeAndString(job.last_run_status.run_status)
+                      .tag_string
+                  }}</van-tag
+                >
+                {{ timestampToDate(job.last_run_status.timestamp) }}
+              </template>
+              <template #value>
+                <van-icon name="close"></van-icon>
+                {{ job.black_list.length ? job.black_list.join(",") : "[无]" }}
+                <br />
+                <van-icon name="passed"></van-icon>
+                {{
+                  job.need_list
+                    .map((need) => need.keyword + "*" + need.amount)
+                    .join(",")
+                }}
+              </template>
+            </van-cell>
+            <template #left>
+              <van-button
+                :style="{ height: '100%' }"
+                type="primary"
+                @click="editJob(job.job_id)"
+                >编辑
+              </van-button>
+              <van-button
+                :style="{ height: '100%' }"
+                @click="runJob(job.job_id)"
+                >运行</van-button
+              >
+            </template>
+            <template #right>
+              <van-button
+                :style="{ height: '100%' }"
+                v-if="job.enable"
+                @click="enableJob(job.job_id, 0)"
+              >
+                关闭
+              </van-button>
+              <van-button
+                :style="{ height: '100%' }"
+                v-else
+                @click="enableJob(job.job_id, 1)"
+                >开启
+              </van-button>
+              <van-button
+                :style="{ height: '100%' }"
+                type="danger"
+                @click="deleteJob(job.job_id)"
+                >删除
+              </van-button>
+            </template>
+          </van-swipe-cell>
+        </div>
+      </van-cell-group>
+      <!-- </van-list> -->
+    </van-skeleton>
+  </van-pull-refresh>
 </template>
 
 <script>
-import api from "../api/api";
-
+import moment from "moment";
+import { getJobAmount, getJobs } from "../api/job";
 export default {
-    mounted() {
-        this.init();
-        setTimeout(() => {
-            this.entering = false;
-        }, 1000);
-
+  async mounted() {
+    this.jobNum = await getJobAmount();
+    this.jobs = await getJobs();
+  },
+  data() {
+    return {
+      jobs: [],
+      jobNum: 0,
+      refreshing: false,
+      loading: false,
+      nextPage: 1,
+      pageSize: 10,
+      hasNextPage: true,
+      entering: false,
+    };
+  },
+  methods: {
+    async onRefresh() {
+      await mounted();
     },
-    data() {
-        return {
-            userNum: 0,
-            jobNum: 0,
-            histories: [],
-            refreshing: false,
-            loading: true,
-            nextPage: 1,
-            pageSize: 10,
-            hasNextPage: true,
-            entering: true
-        };
+    gotoJob() {
+      this.$router.push("/job");
     },
-    methods: {
-        init() {
-            fetch(api + "/info")
-                .then((resp) => resp.json())
-                .then((respJson) => {
-                    this.user = respJson.data.userNum;
-                    this.job = respJson.data.jobNum;
-                })
-                .then(() => {
-                    this.getJobs();
-                })
-                .then(() => {
-                    this.loading = false;
-                })
-                .then(() => {
-                    this.getHistories();
-                })
-                .then(() => {
-                    setTimeout(() => {
-                        this.refreshing = false;
-                    }, 500);
-                });
-        },
-        onRefresh() {
-            this.init();
-        },
-        onLoad() {
-            this.getHistories();
-            //由于无法保证load时job先于onLoad，所以关闭自动加载
-        },
-        getJobs() {
-            fetch(api + "/job", { method: "GET" })
-                .then((resp) => resp.json())
-                .then((respJson) => {
-                    this.jobs = respJson.data;
-                });
-        },
-        getHistories(refresh = false) {
-            if (refresh) {
-                this.hasNextPage = true;
-                this.nextPage = 1;
-            }
-            if (!this.hasNextPage) return;
-            const page = this.nextPage;
-            const pageSize = this.pageSize;
-            fetch(api + "/history?page=" + page + "&pageSize=" + pageSize, {
-                method: "GET",
-            })
-                .then((resp) => resp.json())
-                .then((respJson) => {
-                    for (let i = 0; i < respJson.data.length; i++) {
-                        respJson.data[i]["userId"] = "UNKNOWN";
-                        respJson.data[i]["info"] = "[已删除]";
-                        for (let j = 0; j < this.jobs.length; j++) {
-                            if (respJson.data[i].jobId == this.jobs[j].id) {
-                                respJson.data[i]["userId"] = this.jobs[j].source;
-                                respJson.data[i]["info"] = this.jobs[j].info;
-                                break;
-                            }
-                        }
-                    }
-                    return respJson.data;
-                })
-                .then((data) => {
-                    if (data.length < pageSize) {
-                        this.hasNextPage = false;
-                    }
-                    if (refresh) {
-                        this.histories = data;
-                    } else {
-                        this.histories = this.histories.concat(data);
-                    }
-                    this.nextPage++;
-                })
-                .then(() => {
-                    setTimeout(() => {
-                        this.loading = false;
-                    }, 500);
-                });
-        },
-        gotoUser() {
-            this.$router.push("/user");
-        },
-        gotoJob() {
-            this.$router.push("/job");
-        },
-        deleteHistory(id) {
-            Dialog.confirm({ message: "删除历史记录？" }).then(() => {
-                fetch(api + "/history/" + id, {
-                    method: "DELETE",
-                })
-                    .then((resp) => resp.json())
-                    .then((respJson) => {
-                        if (respJson.status) {
-                            Dialog.alert({ message: "删除成功！" }).then(() =>
-                                this.getHistories(true)
-                            );
-                        } else {
-                            Dialog.alert({ message: respJson.message });
-                        }
-                    });
-            });
-        },
-        debug() {
-            console.log(
-                Object.keys(this.$data)
-                    .map((key) => key + "=" + this[key])
-                    .join(",")
-            );
-        },
+    timestampToDate(timestamp) {
+      return moment.unix(timestamp).format("YYYY/MM/DD HH:mm:SS");
     },
+    statusIdToTypeAndString(statusId) {
+        statusId = Number.parseInt(statusId)
+      const statusString = ["未知状态","成功", "失败", "部分成功"][statusId<=3?statusId:0];
+      const statusType = ["warning","success", "danger", "primary"][
+        statusId <= 3 ? statusId : 0
+      ];
+      return {
+        tag_string: statusString,
+        tag_type: statusType,
+      };
+    },
+  },
 };
 </script>
 

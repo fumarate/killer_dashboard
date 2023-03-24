@@ -1,374 +1,360 @@
 <template>
-    <van-form @submit="submit">
-        <van-cell-group inset>
-            <van-field v-model="accountInfo" is-link readonly label="账号" placeholder="请选择账号"
-                @click="selectingAccount = true">
-            </van-field>
-            <van-popup v-model:show="selectingAccount" round position="bottom">
-                <van-cascader :options="accountOptions" title="选择账号" @close="selectingAccount = false"
-                    @finish="onAccountSelect">
-                </van-cascader>
-            </van-popup>
-            <van-field v-model="realShop" is-link readonly label="商家" placeholder="请选择商家" @click="selectShop">
-            </van-field>
-            <van-popup v-model:show="selectingShop" round position="bottom">
-                <van-cascader :options="shops" :field-names="{ text: 'shopName', value: 'shopId' }" title="选择商家"
-                    @close="selectingShop = false" @finish="onShopSelect">
-                </van-cascader>
-            </van-popup>
-            <van-row class="tags" type="flex">
-                <van-tag class="tag" v-for="(word, index) in job.blackList" :key="index" closeable type="primary"
-                    @close="removeBlackListNewWord(index)">{{ word }}</van-tag>
-            </van-row>
-            <van-field v-model="blackListNewWord" placeholder="黑名单关键词">
-                <template #button>
-                    <van-button @click="addBlackListNewWord">添加</van-button>
-                </template>
-            </van-field>
-            <van-swipe-cell v-for="(value, key) in job.needList" :key="value">
-                <template #left>
-                    <van-button :style="{ height: '100%' }" type="primary" @click="testNeedItem(key)">测试
-                    </van-button>
-                </template>
-                <van-cell :style="{ width: '100%' }">
-                    <van-field :label="key" readonly>
-                        <template #button>
-                            <van-stepper v-model="job.needList[key]" integer min="1" theme="round"></van-stepper>
-                        </template>
-                    </van-field>
-                </van-cell>
-
-                <template #right>
-                    <van-button :style="{ height: '100%' }" type="danger" @click="removeNeedListNewWord(key)">删除
-                    </van-button>
-                </template>
-            </van-swipe-cell>
-            <van-field v-model="needListNewWord" placeholder="需求关键词">
-                <template #button>
-                    <van-button @click="addNeedListNewWord">添加</van-button>
-                </template>
-            </van-field>
-            <van-row class="tags" type="flex">
-                <van-tag class="tag" v-for="(word, index) in hotNeedListWords" :key="index" type="warning"
-                    @click="needListNewWord = word">{{ word }}</van-tag>
-            </van-row>
-
-            <van-field v-model="time" is-link readonly label="时间" placeholder="请选择时间" @click="selectTime">
-            </van-field>
-            <van-popup v-model:show="selectingTime" round position="bottom">
-                <van-datetime-picker ref="timePicker" v-model="currentTime" type="time" title="选择时间"
-                    @confirm="onTimeSelect" @cancel="selectingTime = false" />
-            </van-popup>
-            <van-field readonly label="超时">
-                <template #input>
-                    <van-slider v-model="timeoutPow" :min="0" :max="3" :step="0.001" class="timeout"
-                        @change="onTimeoutChange">
-                        <template #button>
-                            <van-tag class="tag" type="primary" round>{{ Math.round(Math.pow(10, timeoutPow)) }}
-                            </van-tag>
-                        </template>
-                    </van-slider>
-                </template>
-            </van-field>
-
-            <van-field label="备注" v-model="job.info">
-
-            </van-field>
-            <van-field readonly label="运行状态" @click="job.enable = !job.enable">
-                <template #right-icon>
-                    <van-switch v-model="job.enable" size="20" @click="job.enable = !job.enable"></van-switch>
-                </template>
-            </van-field>
-            <van-cell center>
-                <van-radio-group v-model="job.mode" direction="horizontal">
-                    <van-radio :name="1">触发一次</van-radio>
-                    <van-radio :name="2">直到成功</van-radio>
-                    <van-radio :name="3">持续触发</van-radio>
-                </van-radio-group>
+  <van-form @submit="submit">
+    <van-cell-group inset>
+      <van-field label="任务名" v-model="job.info"> </van-field>
+      <van-field
+        v-model="shopSelectedNameWithId"
+        is-link
+        readonly
+        label="商家"
+        placeholder="请选择商家"
+        @click="shopSelectingStart"
+      >
+      </van-field>
+      <van-popup v-model:show="shopSelecting" round position="bottom">
+        <van-cascader
+          :options="shops"
+          :field-names="{ text: 'shop_name', value: 'shop_id' }"
+          title="选择商家"
+          @close="shopSelecting = false"
+          @finish="onShopSelect"
+        >
+        </van-cascader>
+      </van-popup>
+      <van-collapse v-model="keyword" accordion>
+        <van-collapse-item
+          title="黑名单"
+          :value="job.blackList.join(',')"
+          name="1"
+        >
+          <van-swipe-cell
+            v-for="(word, index) in job.blackList"
+            :key="index"
+            @close="removeBlackListNewWord(index)"
+          >
+            <van-field v-model="job.blackList[index]"></van-field>
+            <template #right>
+              <van-button type="danger">删除</van-button>
+            </template></van-swipe-cell
+          >
+          <van-field v-model="blackListNewWord" placeholder="黑名单关键词">
+            <template #button>
+              <van-button @click="addBlackListNewWord" size="small"
+                >添加</van-button
+              >
+            </template>
+          </van-field>
+        </van-collapse-item>
+        <van-collapse-item
+          title="需求"
+          :value="
+          Object.keys(job.needList).map((key) => key+'*'+job.needList[key]).join(',')
+          "
+          name="2"
+        >
+          <van-swipe-cell v-for="(value, key) in job.needList" :key="value">
+            <van-cell :style="{ width: '100%' }" :title="key">
+              <template #value>
+                <van-stepper
+                  v-model="job.needList[key]"
+                  integer
+                  min="1"
+                  theme="round"
+                ></van-stepper>
+              </template>
             </van-cell>
 
+            <template #right>
+              <van-button
+                :style="{ height: '100%' }"
+                type="danger"
+                @click="removeNeedListNewWord(key)"
+                >删除
+              </van-button>
+            </template>
+          </van-swipe-cell>
+          <van-field v-model="needListNewWord" placeholder="需求关键词">
+            <template #button>
+              <van-button @click="addNeedListNewWord" size="small"
+                >添加</van-button
+              >
+            </template>
+          </van-field>
+          <van-row class="tags" type="flex">
+        <van-tag
+          class="tag"
+          v-for="(word, index) in recommendedKeywords"
+          :key="index"
+          type="warning"
+          round
+          @click="needListNewWord = word"
+          >{{ word }}</van-tag
+        >
+      </van-row>
+        </van-collapse-item>
+      </van-collapse>
+      
 
-        </van-cell-group>
-        <div style="margin:16px">
-            <van-button type="primary" native-type="submit" round v-if="update" :style="{ width: '100%' }">更新
-            </van-button>
-            <van-button type="primary" native-type="submit" round v-else :style="{ width: '100%' }">添加</van-button>
-        </div>
-    </van-form>
+      <van-field
+        v-model="time"
+        is-link
+        readonly
+        label="时间"
+        placeholder="请选择时间"
+        @click="timeSelecting = true"
+      >
+      </van-field>
+      <van-popup v-model:show="timeSelecting" round position="bottom">
+        <van-time-picker
+          ref="timePicker"
+          v-model="job.time"
+          title="选择时间"
+          @confirm="timeSelecting = false"
+          @cancel="timeSelecting = false"
+        />
+      </van-popup>
+      <van-field readonly label="超时">
+        <template #input>
+          <van-slider
+            v-model="timeoutFakeValue"
+            :min="0"
+            :max="28"
+            :step="0.01"
+            class="timeout"
+            @change="onTimeoutChange"
+          >
+            <template #button>
+              <van-tag class="tag" type="primary" round
+                >{{ timeoutRealValue }}
+              </van-tag>
+            </template>
+          </van-slider>
+        </template>
+      </van-field>
+
+      <van-field readonly label="运行状态" @click="job.enable = !job.enable">
+        <template #right-icon>
+          <van-switch
+            v-model="job.enable"
+            size="20"
+            @click="job.enable = !job.enable"
+          ></van-switch>
+        </template>
+      </van-field>
+      <van-cell center>
+        <van-radio-group v-model="job.mode" direction="horizontal">
+          <van-radio :name="1">触发一次</van-radio>
+          <van-radio :name="2">直到成功</van-radio>
+          <van-radio :name="3">持续触发</van-radio>
+        </van-radio-group>
+      </van-cell>
+    </van-cell-group>
+    <div style="margin: 16px">
+      <van-button type="primary" native-type="submit" round size="large">{{
+        update ? "更新" : "添加"
+      }}</van-button>
+    </div>
+  </van-form>
 </template>
 
 <script>
-import * as moment from 'moment';
-import { default as api } from '../api/api'
-
+import * as moment from "moment";
+import { getRecommendedKeywords } from "../api/misc";
+import { getShop } from "../api/shop";
+import { addJob, getJobById } from "../api/job";
+import { showSuccessToast, showFailToast, showConfirmDialog } from "vant";
 export default {
-    data() {
-        return {
-            accountOptions: [],
-            shops: [],
-            selectingAccount: false,
-            selectingSource: false,
-            selectingTarget: false,
-            selectingShop: false,
-            selectingTime: false,
-            blackListNewWord: "",
-            needListNewWord: "",
-            job: {
-                source: null,
-                target: -1,
-                shopId: -1,
-                hour: 0,
-                minute: 0,
-                blackList: [],
-                needList: {},
-                enable: true,
-                timeout: 300,
-                info: "",
-                mode: 1
-            },
-            update: false,
-            hotNeedListWords: [
-                "面包", "牛奶", "薯片", "可乐"
-            ],
-            loading: true,
-            timeoutPow: Math.log10(300)
-        }
-    },
-    mounted() {
-        fetch(api + "/school/229", { method: "GET" })
-            .then((resp) => resp.json())
-            .then((respJson) => {
-                this.shops = respJson.data.shops
-            });
-        fetch(api + "/user", {
-            method: "GET",
-        })
-            .then((resp) => resp.json())
-            .then((respJson) => {
-                const users = respJson.data;
-                this.accountOptions = users.map((user) => {
-                    return {
-                        value: user.userId,
-                        text: String(user.userId).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'),
-                        children: user.addressList.map((address) => {
-                            return {
-                                value: address,
-                                text: String(address).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'),
-                            }
-                        })
-                    }
-                });
-            });
-        if (this.$route.query.id) {
-            this.update = true;
-            fetch(api + "/job/" + this.$route.query.id, {
-                method: "GET",
-            })
-                .then((resp) => resp.json())
-                .then((respJson) => {
-                    this.job = respJson.data;
-                    this.timeoutPow = Math.log10(this.job.timeout);
-                })
-        }
-        this.loading = false;
-    },
-    methods: {
-        submit() {
-            if (this.update) {
-                this.updateJob();
-            } else {
-                this.addJob();
-            }
-        },
-        selectTime() {
-            this.selectingTime = true;
-            let timePicker;
-            this.$nextTick(() => {
-                timePicker = this.$refs.timePicker.getPicker();
-                timePicker.setColumnIndex(0, this.job.hour);
-                timePicker.setColumnIndex(1, this.job.minute);
-            })
-        },
-        onTimeoutChange() {
-            this.job.timeout = Math.round(Math.pow(10, this.timeoutPow))
-        }
-        ,
-        selectTarget() {
-            if (this.job.source) {
-                this.selectingTarget = true;
-            } else {
-                Dialog.alert({ message: "请先选择账号!" })
-            }
-        },
-        selectShop() {
-            this.selectingShop = true;
-        },
-        onAccountSelect({ selectedOptions }) {
-            this.job.source = selectedOptions[0].value;
-            this.job.target = selectedOptions[1].value;
-            this.selectingAccount = false;
-        },
-        onShopSelect(action) {
-            this.job.shopId = action.value;
-            this.selectingShop = false;
-        },
-        onTimeSelect(action) {
-            this.job.hour = Number(action.split(":")[0]);
-            this.job.minute = Number(action.split(":")[1]);
-            this.selectingTime = false;
-            const timePicker = this.$refs.timePicker.getPicker();
-            timePicker.setColumnIndex(0, this.job.hour);
-            timePicker.setColumnIndex(1, this.job.minute);
-        },
-        addBlackListNewWord() {
-            if (!this.blackListNewWord) return;
-            const newKey = this.blackListNewWord
-                .replaceAll('"', "")
-                .replaceAll("'", "");
-            let flag = true;
-            this.job.blackList.forEach((word) => {
-                if (newKey === word) {
-                    flag = false;
-                    //上边出来一个提示
-                }
-            });
-            if (flag) {
-                this.job.blackList.push(newKey);
-                this.blackListNewWord = "";
-            }
-        },
-        removeBlackListNewWord(index) {
-            Dialog.confirm({ message: "删除黑名单关键词\"" + this.job.blackList[index] + "\"?" })
-                .then(() => {
-                    if (index < this.job.blackList.length) {
-                        this.job.blackList.splice(index, 1);
-                    }
-                })
-
-        },
-        addNeedListNewWord() {
-            if (!this.needListNewWord) return;
-            const newKey = this.needListNewWord
-                .replaceAll('"', "")
-                .replaceAll("'", "");
-            if (!(newKey in this.job.needList)) {
-                this.job.needList[newKey] = 1;
-                this.needListNewWord = "";
-                //alert
-            }
-        },
-        removeNeedListNewWord(word) {
-            Dialog.confirm({ message: "删除需求\"" + word + "\"?" })
-                .then(() => {
-                    if (word in this.job.needList) {
-                        delete this.job.needList[word];
-                    }
-                })
-        },
-        addJob: function () {
-            if (this.job.source != null && this.job.needList != {}) {
-                if (this.job.info == "") {
-                    this.job.info = Object.keys(this.job.needList).map(key => key + '*' + this.job.needList[key]).join(",");
-                }
-                Dialog.confirm({ message: "添加任务?" })
-                    .then(() => {
-                        fetch(api + "/job", {
-                            method: "post",
-                            body: JSON.stringify(this.job),
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                        })
-                            .then((resp) => resp.json())
-                            .then((respJson) => {
-                                if (respJson.status) {
-                                    Dialog.alert({ message: "添加成功。" })
-                                        .then(() => {
-                                            this.$router.back()
-                                        });
-                                } else {
-                                    Dialog.alert({ message: respJson.exception });
-                                }
-                            });
-                    })
-            }
-        },
-        updateJob() {
-            Dialog.confirm({ message: "更新任务?" })
-                .then(() => {
-                    fetch(api + "/job/" + this.job.id, {
-                        method: "PUT",
-                        body: JSON.stringify(this.job),
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    })
-                        .then((resp) => resp.json())
-                        .then((respJson) => {
-                            if (respJson.status) {
-                                Dialog.alert({ message: "添加成功。" })
-                                    .then(() => {
-                                        this.$router.back()
-
-                                    });
-                            } else {
-                                Dialog.alert({ message: respJson.message });
-                            }
-                        });
-                })
-
-        },
-        testNeedItem(keyWord) {
-            fetch(api + "/testNeedItem?shopId=" + this.job.shopId + "&keyWord=" + keyWord)
-                .then((resp) => resp.json())
-                .then((respJson) => {
-                    if (respJson.status) {
-                        let message = "关键词：" + keyWord + "\n";
-                        respJson.data.forEach((item) => {
-                            message += "命中：" + item.tag + "-" + item.name + "\n";
-                            message += "价格：" + item.price + "库存：" + item.stock + "\n";
-                        })
-                        Dialog.alert({ message: message })
-                    } else {
-                        Dialog.alert({ message: respJson.message })
-                    }
-                })
-        }
-    },
-    computed: {
-        realShop() {
-            for (let i = 0; i < this.shops.length; i++) {
-                if (this.shops[i].shopId == this.job.shopId) {
-                    return this.shops[i].shopName;
-                }
-            }
-            return null;
-        },
-        accountInfo() {
-            if (this.job.source == null) {
-                return "未选择"
-            }
-            if (this.job.source == this.job.target) {
-                return String(this.job.source).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
-            }
-            return String(this.job.source).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') + "👉" + String(this.job.target).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
-        },
-        time() {
-            let timeObject = moment(new Date()).hour(this.job.hour).minute(this.job.minute);
-            return timeObject.format("HH:mm");
-        }
+  data() {
+    return {
+      accountOptions: [],
+      shops: [],
+      shopSelecting: false,
+      shopSelected: {
+        shop_name: "",
+        shop_id: -1,
+      },
+      keyword: null,
+      targetSelecting: false,
+      timeSelecting: false,
+      blackListNewWord: "",
+      needListNewWord: "",
+      job: {
+        target: -1,
+        shopId: null,
+        time:['08','00'],
+        blackList: [],
+        needList: {},
+        enable: true,
+        timeout: 300,
+        info: "",
+        mode: 1,
+      },
+      update: false,
+      recommendedKeywords: [],
+      loading: true,
+      timeoutFakeValue: 900,
+    };
+  },
+  async mounted() {
+    this.recommendedKeywords = await getRecommendedKeywords();
+    this.shops = await getShop();
+    if (this.$route.query.id) {
+      this.update = true;
+      this.job = getJobById(this.$route.query.id);
     }
-}
+    this.loading = false;
+  },
+  methods: {
+    submit() {
+      if (this.update) {
+        this.updateJob();
+      } else {
+        this.addJob();
+      }
+    },
+    onTimeoutChange() {
+      this.job.timeout = this.timeoutRealValue;
+    },
+    shopSelectingStart() {
+      this.shopSelecting = true;
+    },
+    onShopSelect(action) {
+      this.shops.forEach((shop) => {
+        if (shop.shop_id == action.value) {
+          this.shopSelected = shop;
+        }
+      });
+      this.shopSelecting = false;
+    },
+    keyWordCheck(keyWord){
+return keyWord.replaceAll('"', "")
+        .replaceAll("'", "");
+    },
+    addBlackListNewWord() {
+      if (!this.blackListNewWord) return;
+      const newKey = this.keyWordCheck(this.blackListNewWord)
+      let flag = true;
+      this.job.blackList.forEach((word) => {
+        if (newKey === word) {
+          flag = false;
+          showFailToast("关键词已存在！");
+        }
+      });
+      if (flag) {
+        this.job.blackList.push(newKey);
+        this.blackListNewWord = "";
+        showSuccessToast("添加成功。");
+      }
+    },
+    removeBlackListNewWord(index) {
+      showConfirmDialog({
+        message: '删除黑名单关键词"' + this.job.blackList[index] + '"?',
+      }).then(() => {
+        if (index < this.job.blackList.length) {
+          this.job.blackList.splice(index, 1);
+        }
+      });
+    },
+    addNeedListNewWord() {
+      if (!this.needListNewWord) return;
+      const newKey = this.keyWordCheck(this.needListNewWord);
+      let flag=true;
+      Object.keys(this.job.needList).forEach((word) => {
+        if (newKey === word) {
+          flag = false;
+          showFailToast("关键词已存在！");
+        }
+      });
+      if (flag) {
+        this.job.needList[newKey] = 1;
+        this.needListNewWord = "";
+        showSuccessToast("添加成功。");
+      }
+    },
+    removeNeedListNewWord(word) {
+      showConfirmDialog({ message: '删除需求"' + word + '"?' }).then(() => {
+        if (word in this.job.needList) {
+          delete this.job.needList[word];
+        }
+        showSuccessToast("删除成功。");
+      });
+    },
+    add: function () {
+      if (this.job.source != null && this.job.needList != {}) {
+        if (this.job.info == "") {
+          this.job.info = Object.keys(this.job.needList)
+            .map((key) => key + "*" + this.job.needList[key])
+            .join(",");
+        }
+        showConfirmDialog({ message: "添加任务?" }).then(() => {
+          const result = addJob(this.job);
+          if (result != null) {
+            showSuccessToast("添加成功");
+            this.$router.back();
+          }
+        });
+      }
+    },
+    updateJob() {
+      Dialog.confirm({ message: "更新任务?" }).then(() => {
+        fetch(api + "/job/" + this.job.id, {
+          method: "PUT",
+          body: JSON.stringify(this.job),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((resp) => resp.json())
+          .then((respJson) => {
+            if (respJson.status) {
+              Dialog.alert({ message: "添加成功。" }).then(() => {
+                this.$router.back();
+              });
+            } else {
+              Dialog.alert({ message: respJson.message });
+            }
+          });
+      });
+    },
+  },
+  computed: {
+    timeoutRealValue() {
+      const tfv = Math.floor(this.timeoutFakeValue);
+      if (tfv >= 0 && tfv <= 10) {
+        return tfv;
+      } else {
+        return [
+          20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700,
+          800, 900, 999,
+        ][tfv <= 28 ? tfv - 11 : 28];
+      }
+    },
+    time() {
+      let timeObject = moment(new Date())
+        .hour(this.job.time[0])
+        .minute(this.job.time[1]);
+      return timeObject.format("HH:mm");
+    },
+    shopSelectedNameWithId() {
+      if (this.shopSelected.shop_id == -1) {
+        return "未选择";
+      } else
+        return (
+          this.shopSelected.shop_name + "(" + this.shopSelected.shop_id + ")"
+        );
+    },
+  },
+};
 </script>
 
 <style scoped>
 .tags {
-    margin-left: 15px;
-    margin-right: 15px;
+  margin-left: 15px;
+  margin-right: 15px;
 }
 
 .tag {
-    padding: 5px;
-    margin: 2px
+  padding: 5px;
+  margin: 2px;
 }
 </style>
